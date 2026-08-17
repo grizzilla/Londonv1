@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Team Ivy London Vacation</title>
+  <title>Soho & Central London Explorer - Master Location Finder</title>
   <!-- Leaflet CSS for Map Rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -364,7 +364,7 @@
   <!-- Header & Controls -->
   <header>
     <div class="brand">
-      <span class="brand-badge">Soho</span> Team Ivy London Christmas Guide
+      <span class="brand-badge">Soho</span> Central London Explorer
     </div>
     
     <div class="controls-container">
@@ -416,17 +416,13 @@
       <!-- Filter 2: Category Dropdown -->
       <select id="categoryFilter" class="select-filter">
         <option value="ALL">Category: All Locations</option>
+        <option value="Greggs">Greggs</option>
         <option value="Historic Pubs">Historic Pubs</option>
         <option value="Chippys & Traditional Food">Chippys & Traditional Food</option>
         <option value="Museums & Historic Sites">Museums & Historic Sites</option>
         <option value="Shopping & Markets">Shopping & Markets</option>
         <option value="Christmas & Holiday Lights">Christmas & Holiday Lights</option>
         <option value="Restaurants & Afternoon Tea">Restaurants & Afternoon Tea</option>
-        <option value="Greggs - Standard Store">Greggs - Standard Store</option>
-        <option value="Greggs - Flagship & Late Night">Greggs - Flagship & Late Night</option>
-        <option value="Greggs - Station">Greggs - Station</option>
-        <option value="Greggs - Express Store">Greggs - Express Store</option>
-        <option value="Greggs - Outlet">Greggs - Outlet</option>
       </select>
 
       <!-- Add Location Button -->
@@ -468,17 +464,13 @@
           <div class="form-group">
             <label for="newCategory">Category</label>
             <select id="newCategory" required>
+              <option value="Greggs">Greggs</option>
               <option value="Historic Pubs">Historic Pubs</option>
               <option value="Chippys & Traditional Food">Chippys & Traditional Food</option>
               <option value="Museums & Historic Sites">Museums & Historic Sites</option>
               <option value="Shopping & Markets">Shopping & Markets</option>
               <option value="Christmas & Holiday Lights">Christmas & Holiday Lights</option>
               <option value="Restaurants & Afternoon Tea">Restaurants & Afternoon Tea</option>
-              <option value="Greggs - Standard Store">Greggs - Standard Store</option>
-              <option value="Greggs - Flagship & Late Night">Greggs - Flagship & Late Night</option>
-              <option value="Greggs - Station">Greggs - Station</option>
-              <option value="Greggs - Express Store">Greggs - Express Store</option>
-              <option value="Greggs - Outlet">Greggs - Outlet</option>
             </select>
           </div>
           <div class="form-group">
@@ -576,59 +568,59 @@
       { id: 603, name: "Mildreds Soho", address: "45 Lexington St, Soho, W1F 9AN", category: "Restaurants & Afternoon Tea", bestTime: "Wednesday Evening", lat: 51.5128, lng: -0.1368 },
       { id: 604, name: "Bao Soho", address: "53 Lexington St, Soho, W1F 9AS", category: "Restaurants & Afternoon Tea", bestTime: "Tuesday Evening", lat: 51.5131, lng: -0.1369 },
 
-      // --- 52 Greggs Locations ---
-      { id: 1, name: "Greggs Leicester Square", address: "1 Leicester Sq, WC2H 7NA", category: "Greggs - Flagship & Late Night", bestTime: "Friday Evening", lat: 51.5103, lng: -0.1302 },
-      { id: 2, name: "Greggs @ Primark Oxford St", address: "14-28 Oxford St, W1D 1AU", category: "Greggs - Standard Store", bestTime: "Monday Afternoon", lat: 51.5165, lng: -0.1315 },
-      { id: 3, name: "Greggs Tottenham Court Rd", address: "101 Tottenham Court Rd, W1T 4TT", category: "Greggs - Standard Store", bestTime: "Tuesday Morning", lat: 51.5208, lng: -0.1345 },
-      { id: 4, name: "Greggs Piccadilly Circus", address: "48 Regent St, W1B 5RA", category: "Greggs - Flagship & Late Night", bestTime: "Saturday Evening", lat: 51.5101, lng: -0.1362 },
-      { id: 5, name: "Greggs Strand", address: "421-422 Strand, WC2R 0PS", category: "Greggs - Flagship & Late Night", bestTime: "Thursday Afternoon", lat: 51.5098, lng: -0.1235 },
-      { id: 6, name: "Greggs Great Portland St", address: "94 Great Portland St, W1W 7NU", category: "Greggs - Standard Store", bestTime: "Monday Morning", lat: 51.5201, lng: -0.1425 },
-      { id: 7, name: "Greggs Embankment Stn", address: "Embankment Underground, WC2N 6NS", category: "Greggs - Station", bestTime: "Wednesday Morning", lat: 51.5071, lng: -0.1223 },
-      { id: 8, name: "Greggs Kingsway", address: "60 Kingsway, WC2A 3JB", category: "Greggs - Standard Store", bestTime: "Tuesday Afternoon", lat: 51.5159, lng: -0.1195 },
-      { id: 9, name: "Greggs High Holborn", address: "9 Chancery Lane, WC1V 6DR", category: "Greggs - Standard Store", bestTime: "Wednesday Afternoon", lat: 51.5178, lng: -0.1118 },
-      { id: 10, name: "Greggs Holborn Leather Ln", address: "81 Leather Ln, EC1N 7TS", category: "Greggs - Express Store", bestTime: "Thursday Morning", lat: 51.5209, lng: -0.1092 },
-      { id: 11, name: "Greggs Oxford Circus", address: "250 Regent St, W1B 3BR", category: "Greggs - Standard Store", bestTime: "Saturday Afternoon", lat: 51.5151, lng: -0.1418 },
-      { id: 12, name: "Greggs Warren Street", address: "120 Warren St, W1T 5LY", category: "Greggs - Standard Store", bestTime: "Friday Morning", lat: 51.5242, lng: -0.1381 },
-      { id: 13, name: "Greggs Westminster Underground", address: "Westminster Station, SW1A 2JR", category: "Greggs - Station", bestTime: "Monday Evening", lat: 51.5011, lng: -0.1252 },
-      { id: 14, name: "Greggs Victoria Palmer St", address: "U29 Palmer St, SW1H 0PH", category: "Greggs - Standard Store", bestTime: "Tuesday Evening", lat: 51.4981, lng: -0.1345 },
-      { id: 15, name: "Greggs Victoria St", address: "165 Victoria St, SW1E 5NA", category: "Greggs - Standard Store", bestTime: "Wednesday Evening", lat: 51.4965, lng: -0.1412 },
-      { id: 16, name: "Greggs Victoria Coach Stn", address: "U1 London Victoria Coach, SW1W 9TP", category: "Greggs - Station", bestTime: "Sunday Afternoon", lat: 51.4925, lng: -0.1481 },
-      { id: 17, name: "Greggs Pimlico", address: "111 Lupus St, SW1V 3EN", category: "Greggs - Standard Store", bestTime: "Sunday Morning", lat: 51.4878, lng: -0.1362 },
-      { id: 18, name: "Greggs Euston Road", address: "180 Euston Rd, NW1 2AL", category: "Greggs - Express Store", bestTime: "Thursday Evening", lat: 51.5269, lng: -0.1292 },
-      { id: 19, name: "Greggs Euston Station", address: "Euston Station Concourse, NW1 2RT", category: "Greggs - Station", bestTime: "Friday Afternoon", lat: 51.5281, lng: -0.1331 },
-      { id: 20, name: "Greggs Robert St Outlet", address: "100 Robert St, NW1 3QP", category: "Greggs - Outlet", bestTime: "Saturday Morning", lat: 51.5275, lng: -0.1402 },
-      { id: 21, name: "Greggs Marylebone Stn", address: "Marylebone Station, NW1 6JJ", category: "Greggs - Station", bestTime: "Monday Morning", lat: 51.5225, lng: -0.1631 },
-      { id: 22, name: "Greggs Baker Street", address: "211 Baker St, NW1 6XE", category: "Greggs - Standard Store", bestTime: "Tuesday Morning", lat: 51.5238, lng: -0.1578 },
-      { id: 23, name: "Greggs St Pancras Intl", address: "St Pancras Intl Concourse, N1C 4QP", category: "Greggs - Station", bestTime: "Wednesday Morning", lat: 51.5305, lng: -0.1259 },
-      { id: 24, name: "Greggs King's Cross Stn", address: "King's Cross Station, N1 9AL", category: "Greggs - Station", bestTime: "Thursday Afternoon", lat: 51.5318, lng: -0.1241 },
-      { id: 25, name: "Greggs Camden High St", address: "128 Camden High St, NW1 0LU", category: "Greggs - Standard Store", bestTime: "Saturday Afternoon", lat: 51.5391, lng: -0.1425 },
-      { id: 26, name: "Greggs Farringdon Rd", address: "45 Farringdon Rd, EC1M 3JB", category: "Greggs - Express Store", bestTime: "Friday Morning", lat: 51.5208, lng: -0.1051 },
-      { id: 27, name: "Greggs Clerkenwell Rd", address: "102 Clerkenwell Rd, EC1M 5SA", category: "Greggs - Standard Store", bestTime: "Monday Afternoon", lat: 51.5228, lng: -0.1012 },
-      { id: 28, name: "Greggs Waterloo Station", address: "Waterloo Station Concourse, SE1 7LY", category: "Greggs - Station", bestTime: "Friday Evening", lat: 51.5031, lng: -0.1132 },
-      { id: 29, name: "Greggs Waterloo Rd", address: "108 Waterloo Rd, SE1 8SB", category: "Greggs - Standard Store", bestTime: "Thursday Morning", lat: 51.5015, lng: -0.1110 },
-      { id: 30, name: "Greggs Southwark St", address: "50 Southwark St, SE1 1UN", category: "Greggs - Express Store", bestTime: "Tuesday Afternoon", lat: 51.5042, lng: -0.0975 },
-      { id: 31, name: "Greggs Borough High St", address: "110 Borough High St, SE1 1LB", category: "Greggs - Standard Store", bestTime: "Wednesday Afternoon", lat: 51.5021, lng: -0.0901 },
-      { id: 32, name: "Greggs London Bridge SU53", address: "SU53 London Bridge Station, SE1 9SP", category: "Greggs - Station", bestTime: "Monday Evening", lat: 51.5052, lng: -0.0862 },
-      { id: 33, name: "Greggs London Bridge U8", address: "U8 London Bridge Station, SE1 9SP", category: "Greggs - Station", bestTime: "Tuesday Evening", lat: 51.5048, lng: -0.0858 },
-      { id: 34, name: "Greggs London Bridge SU45", address: "SU45 London Bridge Station, SE1 9SP", category: "Greggs - Station", bestTime: "Wednesday Evening", lat: 51.5045, lng: -0.0852 },
-      { id: 35, name: "Greggs Cannon St", address: "Arch 1 Dowgate Hill, EC4N 6AP", category: "Greggs - Express Store", bestTime: "Thursday Evening", lat: 51.5112, lng: -0.0905 },
-      { id: 36, name: "Greggs Cheapside", address: "49 Cheapside, EC2V 6AT", category: "Greggs - Standard Store", bestTime: "Friday Afternoon", lat: 51.5135, lng: -0.0928 },
-      { id: 37, name: "Greggs Eastcheap", address: "3 Eastcheap, EC3M 1AG", category: "Greggs - Standard Store", bestTime: "Monday Morning", lat: 51.5108, lng: -0.0842 },
-      { id: 38, name: "Greggs Old Broad St", address: "83 Old Broad St, EC2M 1PR", category: "Greggs - Standard Store", bestTime: "Tuesday Morning", lat: 51.5155, lng: -0.0845 },
-      { id: 39, name: "Greggs Bishopsgate", address: "154 Bishopsgate, EC2M 4LN", category: "Greggs - Standard Store", bestTime: "Wednesday Morning", lat: 51.5171, lng: -0.0805 },
-      { id: 40, name: "Greggs Liverpool St Stn", address: "U26 Liverpool Street Station, EC2M 7PY", category: "Greggs - Station", bestTime: "Thursday Morning", lat: 51.5181, lng: -0.0818 },
-      { id: 41, name: "Greggs Finsbury Sq", address: "50 Finsbury Square, EC2A 1HD", category: "Greggs - Express Store", bestTime: "Friday Afternoon", lat: 51.5211, lng: -0.0872 },
-      { id: 42, name: "Greggs City Rd", address: "91 City Rd, EC1Y 1BD", category: "Greggs - Standard Store", bestTime: "Saturday Morning", lat: 51.5252, lng: -0.0882 },
-      { id: 43, name: "Greggs Aldgate High St", address: "74 Aldgate High St, EC3N 1BD", category: "Greggs - Standard Store", bestTime: "Sunday Evening", lat: 51.5142, lng: -0.0751 },
-      { id: 44, name: "Greggs Elephant & Castle", address: "Elephant & Castle Centre, SE1 6TE", category: "Greggs - Standard Store", bestTime: "Sunday Afternoon", lat: 51.4948, lng: -0.1005 },
-      { id: 45, name: "Greggs Vauxhall Station", address: "Vauxhall Bus Station, SW8 1SJ", category: "Greggs - Station", bestTime: "Monday Afternoon", lat: 51.4859, lng: -0.1238 },
-      { id: 46, name: "Greggs Praed Street", address: "148 Praed St, W2 1JN", category: "Greggs - Standard Store", bestTime: "Tuesday Evening", lat: 51.5171, lng: -0.1738 },
-      { id: 47, name: "Greggs Paddington Stn", address: "Paddington Station Concourse, W2 1HA", category: "Greggs - Station", bestTime: "Wednesday Afternoon", lat: 51.5162, lng: -0.1762 },
-      { id: 48, name: "Greggs Edgware Road", address: "240 Edgware Rd, W2 1DW", category: "Greggs - Standard Store", bestTime: "Thursday Evening", lat: 51.5195, lng: -0.1685 },
-      { id: 49, name: "Greggs Bayswater", address: "68 Queensway, W2 3RL", category: "Greggs - Standard Store", bestTime: "Friday Evening", lat: 51.5112, lng: -0.1872 },
-      { id: 50, name: "Greggs Kensington High St", address: "112 Kensington High St, W8 4SG", category: "Greggs - Standard Store", bestTime: "Saturday Morning", lat: 51.5008, lng: -0.1925 },
-      { id: 51, name: "Greggs Earl's Court", address: "212 Earls Court Rd, SW5 9QA", category: "Greggs - Express Store", bestTime: "Sunday Morning", lat: 51.4918, lng: -0.1952 },
-      { id: 52, name: "Greggs Hammersmith Broadway", address: "28 Broadway Centre, W6 9YD", category: "Greggs - Station", bestTime: "Saturday Evening", lat: 51.4928, lng: -0.2241 }
+      // --- 52 Greggs Locations (Unified Category: Greggs) ---
+      { id: 1, name: "Greggs Leicester Square", address: "1 Leicester Sq, WC2H 7NA", category: "Greggs", bestTime: "Friday Evening", lat: 51.5103, lng: -0.1302 },
+      { id: 2, name: "Greggs @ Primark Oxford St", address: "14-28 Oxford St, W1D 1AU", category: "Greggs", bestTime: "Monday Afternoon", lat: 51.5165, lng: -0.1315 },
+      { id: 3, name: "Greggs Tottenham Court Rd", address: "101 Tottenham Court Rd, W1T 4TT", category: "Greggs", bestTime: "Tuesday Morning", lat: 51.5208, lng: -0.1345 },
+      { id: 4, name: "Greggs Piccadilly Circus", address: "48 Regent St, W1B 5RA", category: "Greggs", bestTime: "Saturday Evening", lat: 51.5101, lng: -0.1362 },
+      { id: 5, name: "Greggs Strand", address: "421-422 Strand, WC2R 0PS", category: "Greggs", bestTime: "Thursday Afternoon", lat: 51.5098, lng: -0.1235 },
+      { id: 6, name: "Greggs Great Portland St", address: "94 Great Portland St, W1W 7NU", category: "Greggs", bestTime: "Monday Morning", lat: 51.5201, lng: -0.1425 },
+      { id: 7, name: "Greggs Embankment Stn", address: "Embankment Underground, WC2N 6NS", category: "Greggs", bestTime: "Wednesday Morning", lat: 51.5071, lng: -0.1223 },
+      { id: 8, name: "Greggs Kingsway", address: "60 Kingsway, WC2A 3JB", category: "Greggs", bestTime: "Tuesday Afternoon", lat: 51.5159, lng: -0.1195 },
+      { id: 9, name: "Greggs High Holborn", address: "9 Chancery Lane, WC1V 6DR", category: "Greggs", bestTime: "Wednesday Afternoon", lat: 51.5178, lng: -0.1118 },
+      { id: 10, name: "Greggs Holborn Leather Ln", address: "81 Leather Ln, EC1N 7TS", category: "Greggs", bestTime: "Thursday Morning", lat: 51.5209, lng: -0.1092 },
+      { id: 11, name: "Greggs Oxford Circus", address: "250 Regent St, W1B 3BR", category: "Greggs", bestTime: "Saturday Afternoon", lat: 51.5151, lng: -0.1418 },
+      { id: 12, name: "Greggs Warren Street", address: "120 Warren St, W1T 5LY", category: "Greggs", bestTime: "Friday Morning", lat: 51.5242, lng: -0.1381 },
+      { id: 13, name: "Greggs Westminster Underground", address: "Westminster Station, SW1A 2JR", category: "Greggs", bestTime: "Monday Evening", lat: 51.5011, lng: -0.1252 },
+      { id: 14, name: "Greggs Victoria Palmer St", address: "U29 Palmer St, SW1H 0PH", category: "Greggs", bestTime: "Tuesday Evening", lat: 51.4981, lng: -0.1345 },
+      { id: 15, name: "Greggs Victoria St", address: "165 Victoria St, SW1E 5NA", category: "Greggs", bestTime: "Wednesday Evening", lat: 51.4965, lng: -0.1412 },
+      { id: 16, name: "Greggs Victoria Coach Stn", address: "U1 London Victoria Coach, SW1W 9TP", category: "Greggs", bestTime: "Sunday Afternoon", lat: 51.4925, lng: -0.1481 },
+      { id: 17, name: "Greggs Pimlico", address: "111 Lupus St, SW1V 3EN", category: "Greggs", bestTime: "Sunday Morning", lat: 51.4878, lng: -0.1362 },
+      { id: 18, name: "Greggs Euston Road", address: "180 Euston Rd, NW1 2AL", category: "Greggs", bestTime: "Thursday Evening", lat: 51.5269, lng: -0.1292 },
+      { id: 19, name: "Greggs Euston Station", address: "Euston Station Concourse, NW1 2RT", category: "Greggs", bestTime: "Friday Afternoon", lat: 51.5281, lng: -0.1331 },
+      { id: 20, name: "Greggs Robert St Outlet", address: "100 Robert St, NW1 3QP", category: "Greggs", bestTime: "Saturday Morning", lat: 51.5275, lng: -0.1402 },
+      { id: 21, name: "Greggs Marylebone Stn", address: "Marylebone Station, NW1 6JJ", category: "Greggs", bestTime: "Monday Morning", lat: 51.5225, lng: -0.1631 },
+      { id: 22, name: "Greggs Baker Street", address: "211 Baker St, NW1 6XE", category: "Greggs", bestTime: "Tuesday Morning", lat: 51.5238, lng: -0.1578 },
+      { id: 23, name: "Greggs St Pancras Intl", address: "St Pancras Intl Concourse, N1C 4QP", category: "Greggs", bestTime: "Wednesday Morning", lat: 51.5305, lng: -0.1259 },
+      { id: 24, name: "Greggs King's Cross Stn", address: "King's Cross Station, N1 9AL", category: "Greggs", bestTime: "Thursday Afternoon", lat: 51.5318, lng: -0.1241 },
+      { id: 25, name: "Greggs Camden High St", address: "128 Camden High St, NW1 0LU", category: "Greggs", bestTime: "Saturday Afternoon", lat: 51.5391, lng: -0.1425 },
+      { id: 26, name: "Greggs Farringdon Rd", address: "45 Farringdon Rd, EC1M 3JB", category: "Greggs", bestTime: "Friday Morning", lat: 51.5208, lng: -0.1051 },
+      { id: 27, name: "Greggs Clerkenwell Rd", address: "102 Clerkenwell Rd, EC1M 5SA", category: "Greggs", bestTime: "Monday Afternoon", lat: 51.5228, lng: -0.1012 },
+      { id: 28, name: "Greggs Waterloo Station", address: "Waterloo Station Concourse, SE1 7LY", category: "Greggs", bestTime: "Friday Evening", lat: 51.5031, lng: -0.1132 },
+      { id: 29, name: "Greggs Waterloo Rd", address: "108 Waterloo Rd, SE1 8SB", category: "Greggs", bestTime: "Thursday Morning", lat: 51.5015, lng: -0.1110 },
+      { id: 30, name: "Greggs Southwark St", address: "50 Southwark St, SE1 1UN", category: "Greggs", bestTime: "Tuesday Afternoon", lat: 51.5042, lng: -0.0975 },
+      { id: 31, name: "Greggs Borough High St", address: "110 Borough High St, SE1 1LB", category: "Greggs", bestTime: "Wednesday Afternoon", lat: 51.5021, lng: -0.0901 },
+      { id: 32, name: "Greggs London Bridge SU53", address: "SU53 London Bridge Station, SE1 9SP", category: "Greggs", bestTime: "Monday Evening", lat: 51.5052, lng: -0.0862 },
+      { id: 33, name: "Greggs London Bridge U8", address: "U8 London Bridge Station, SE1 9SP", category: "Greggs", bestTime: "Tuesday Evening", lat: 51.5048, lng: -0.0858 },
+      { id: 34, name: "Greggs London Bridge SU45", address: "SU45 London Bridge Station, SE1 9SP", category: "Greggs", bestTime: "Wednesday Evening", lat: 51.5045, lng: -0.0852 },
+      { id: 35, name: "Greggs Cannon St", address: "Arch 1 Dowgate Hill, EC4N 6AP", category: "Greggs", bestTime: "Thursday Evening", lat: 51.5112, lng: -0.0905 },
+      { id: 36, name: "Greggs Cheapside", address: "49 Cheapside, EC2V 6AT", category: "Greggs", bestTime: "Friday Afternoon", lat: 51.5135, lng: -0.0928 },
+      { id: 37, name: "Greggs Eastcheap", address: "3 Eastcheap, EC3M 1AG", category: "Greggs", bestTime: "Monday Morning", lat: 51.5108, lng: -0.0842 },
+      { id: 38, name: "Greggs Old Broad St", address: "83 Old Broad St, EC2M 1PR", category: "Greggs", bestTime: "Tuesday Morning", lat: 51.5155, lng: -0.0845 },
+      { id: 39, name: "Greggs Bishopsgate", address: "154 Bishopsgate, EC2M 4LN", category: "Greggs", bestTime: "Wednesday Morning", lat: 51.5171, lng: -0.0805 },
+      { id: 40, name: "Greggs Liverpool St Stn", address: "U26 Liverpool Street Station, EC2M 7PY", category: "Greggs", bestTime: "Thursday Morning", lat: 51.5181, lng: -0.0818 },
+      { id: 41, name: "Greggs Finsbury Sq", address: "50 Finsbury Square, EC2A 1HD", category: "Greggs", bestTime: "Friday Afternoon", lat: 51.5211, lng: -0.0872 },
+      { id: 42, name: "Greggs City Rd", address: "91 City Rd, EC1Y 1BD", category: "Greggs", bestTime: "Saturday Morning", lat: 51.5252, lng: -0.0882 },
+      { id: 43, name: "Greggs Aldgate High St", address: "74 Aldgate High St, EC3N 1BD", category: "Greggs", bestTime: "Sunday Evening", lat: 51.5142, lng: -0.0751 },
+      { id: 44, name: "Greggs Elephant & Castle", address: "Elephant & Castle Centre, SE1 6TE", category: "Greggs", bestTime: "Sunday Afternoon", lat: 51.4948, lng: -0.1005 },
+      { id: 45, name: "Greggs Vauxhall Station", address: "Vauxhall Bus Station, SW8 1SJ", category: "Greggs", bestTime: "Monday Afternoon", lat: 51.4859, lng: -0.1238 },
+      { id: 46, name: "Greggs Praed Street", address: "148 Praed St, W2 1JN", category: "Greggs", bestTime: "Tuesday Evening", lat: 51.5171, lng: -0.1738 },
+      { id: 47, name: "Greggs Paddington Stn", address: "Paddington Station Concourse, W2 1HA", category: "Greggs", bestTime: "Wednesday Afternoon", lat: 51.5162, lng: -0.1762 },
+      { id: 48, name: "Greggs Edgware Road", address: "240 Edgware Rd, W2 1DW", category: "Greggs", bestTime: "Thursday Evening", lat: 51.5195, lng: -0.1685 },
+      { id: 49, name: "Greggs Bayswater", address: "68 Queensway, W2 3RL", category: "Greggs", bestTime: "Friday Evening", lat: 51.5112, lng: -0.1872 },
+      { id: 50, name: "Greggs Kensington High St", address: "112 Kensington High St, W8 4SG", category: "Greggs", bestTime: "Saturday Morning", lat: 51.5008, lng: -0.1925 },
+      { id: 51, name: "Greggs Earl's Court", address: "212 Earls Court Rd, SW5 9QA", category: "Greggs", bestTime: "Sunday Morning", lat: 51.4918, lng: -0.1952 },
+      { id: 52, name: "Greggs Hammersmith Broadway", address: "28 Broadway Centre, W6 9YD", category: "Greggs", bestTime: "Saturday Evening", lat: 51.4928, lng: -0.2241 }
     ];
 
     // Distance calculation (Haversine formula in miles)
@@ -654,115 +646,112 @@
     const map = L.map('map').setView([SOHO_LAT, SOHO_LNG], 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Custom Soho Benchmark Marker
-    const sohoIcon = L.divIcon({
-      className: 'soho-marker',
-      html: `<div style="background:#f2a900; color:#0f172a; border:2px solid #0f172a; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:11px; box-shadow:0 2px 6px rgba(0,0,0,0.3);">Soho</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
-    });
-    L.marker([SOHO_LAT, SOHO_LNG], { icon: sohoIcon }).addTo(map).bindPopup("<b>Soho Center Benchmark</b>");
+    const markersLayer = L.layerGroup().addTo(map);
 
-    let activeMarkers = [];
-
-    // Main Render Function
+    // Dynamic Filter & Render Function
     function render() {
-      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
       const timeVal = document.getElementById('timeFilter').value;
-      const categoryVal = document.getElementById('categoryFilter').value;
+      const catVal = document.getElementById('categoryFilter').value;
 
-      // Filter dataset
       const filtered = locations.filter(loc => {
-        const matchesSearch = loc.name.toLowerCase().includes(searchVal) || 
-                              loc.address.toLowerCase().includes(searchVal) ||
-                              loc.category.toLowerCase().includes(searchVal);
-        const matchesTime = (timeVal === "ALL" || loc.bestTime === timeVal);
-        const matchesCat = (categoryVal === "ALL" || loc.category === categoryVal);
+        const matchesSearch = loc.name.toLowerCase().includes(searchVal) || loc.address.toLowerCase().includes(searchVal);
+        const matchesTime = timeVal === 'ALL' || loc.bestTime === timeVal;
+        const matchesCat = catVal === 'ALL' || loc.category === catVal;
         return matchesSearch && matchesTime && matchesCat;
       });
 
       // Sort by proximity to Soho
       filtered.sort((a, b) => a.distance - b.distance);
 
-      // Clear existing markers
-      activeMarkers.forEach(m => map.removeLayer(m));
-      activeMarkers = [];
+      document.getElementById('countDisplay').textContent = `Showing ${filtered.length} location${filtered.length === 1 ? '' : 's'}`;
 
-      // Render Sidebar Cards
-      const listContainer = document.getElementById('locationList');
-      listContainer.innerHTML = '';
-      document.getElementById('countDisplay').innerText = `Showing ${filtered.length} of ${locations.length} locations`;
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted);">No locations found matching your search and filter criteria.</div>`;
-        return;
-      }
+      const listEl = document.getElementById('locationList');
+      listEl.innerHTML = '';
+      markersLayer.clearLayers();
 
       filtered.forEach(loc => {
-        // Construct dynamic Google Maps walking directions link
-        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}&travelmode=walking`;
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
 
+        // Create Sidebar Card
         const card = document.createElement('div');
         card.className = 'location-card';
-        card.id = `card-${loc.id}`;
+        card.dataset.id = loc.id;
         card.innerHTML = `
           <div class="card-title">${loc.name}</div>
           <div class="card-address">${loc.address}</div>
           <div class="card-meta">
             <span class="tag tag-category">${loc.category}</span>
-            <span class="tag tag-time">🕒 ${loc.bestTime}</span>
+            <span class="tag tag-time">${loc.bestTime}</span>
             <span class="tag tag-dist">${loc.distance} mi</span>
-            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="tag tag-directions" onclick="event.stopPropagation()">🚶 Walking Directions</a>
+            <a class="tag tag-directions" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">Directions</a>
           </div>
         `;
 
-        const marker = L.marker([loc.lat, loc.lng]).addTo(map);
-        marker.bindPopup(`
-          <div style="font-family: sans-serif; padding: 2px;">
-            <b style="color:#0f172a; font-size:1rem;">${loc.name}</b><br/>
-            <span style="color:#64748b; font-size:0.85rem;">${loc.address}</span><br/>
-            <small style="color:#0369a1;"><b>Category:</b> ${loc.category}</small><br/>
-            <small style="color:#92400e;"><b>Best Time:</b> ${loc.bestTime}</small><br/><br/>
-            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; background:#005587; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.8rem; font-weight:bold;">🚶 Google Maps Walking Directions</a>
+        // Create Leaflet Marker & Comprehensive Info Popup
+        const marker = L.marker([loc.lat, loc.lng]);
+        
+        const popupContent = `
+          <div style="font-family: sans-serif; min-width: 210px; padding: 2px;">
+            <h4 style="margin: 0 0 6px 0; color: #0f172a; font-size: 1.05rem; font-weight: 700;">${loc.name}</h4>
+            <p style="margin: 0 0 10px 0; color: #64748b; font-size: 0.85rem; line-height: 1.35;">${loc.address}</p>
+            <div style="font-size: 0.82rem; color: #334155; line-height: 1.6; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+              <div><strong>Category:</strong> ${loc.category}</div>
+              <div><strong>Best Time to Visit:</strong> ${loc.bestTime}</div>
+              <div><strong>Distance:</strong> ${loc.distance} miles from Soho</div>
+              <div><strong>Coordinates:</strong> ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}</div>
+            </div>
+            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display: block; text-align: center; background: #005587; color: white; padding: 7px 12px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 0.82rem;">Get Google Directions &rarr;</a>
           </div>
-        `);
+        `;
 
+        marker.bindPopup(popupContent);
+        marker.addTo(markersLayer);
+
+        // Sidebar Card Click Handler
+        card.addEventListener('click', (e) => {
+          if (e.target.classList.contains('tag-directions')) return;
+          document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          map.setView([loc.lat, loc.lng], 16);
+          marker.openPopup();
+        });
+
+        // Marker Click Handler
         marker.on('click', () => {
           document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
           card.classList.add('active');
           card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
-        card.addEventListener('click', () => {
-          document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          map.panTo([loc.lat, loc.lng]);
-          marker.openPopup();
-        });
-
-        activeMarkers.push(marker);
-        listContainer.appendChild(card);
+        listEl.appendChild(card);
       });
     }
 
-    // Event Listeners for Input Filters
+    // Attach Event Listeners to Controls
     document.getElementById('searchInput').addEventListener('input', render);
     document.getElementById('timeFilter').addEventListener('change', render);
     document.getElementById('categoryFilter').addEventListener('change', render);
 
-    // Modal Control Logic
+    // Modal Control Handlers
     const addModal = document.getElementById('addModal');
-    document.getElementById('openAddModalBtn').addEventListener('click', () => addModal.classList.add('open'));
-    document.getElementById('closeAddModalBtn').addEventListener('click', () => addModal.classList.remove('open'));
-    document.getElementById('cancelModalBtn').addEventListener('click', () => addModal.classList.remove('open'));
+    const openBtn = document.getElementById('openAddModalBtn');
+    const closeBtn = document.getElementById('closeAddModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+
+    openBtn.addEventListener('click', () => addModal.classList.add('open'));
+    closeBtn.addEventListener('click', () => addModal.classList.remove('open'));
+    cancelBtn.addEventListener('click', () => addModal.classList.remove('open'));
+    addModal.addEventListener('click', (e) => {
+      if (e.target === addModal) addModal.classList.remove('open');
+    });
 
     // Handle Adding New Location
     document.getElementById('addLocationForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      
       const newLoc = {
         id: Date.now(),
         name: document.getElementById('newTitle').value,
@@ -773,14 +762,12 @@
         lng: parseFloat(document.getElementById('newLng').value)
       };
 
+      newLoc.distance = parseFloat(getDistanceInMiles(SOHO_LAT, SOHO_LNG, newLoc.lat, newLoc.lng));
       locations.push(newLoc);
-      updateDistances();
-      
-      addModal.classList.remove('open');
-      e.target.reset();
 
       render();
-      map.flyTo([newLoc.lat, newLoc.lng], 15);
+      addModal.classList.remove('open');
+      e.target.reset();
     });
 
     // Initial Execution
