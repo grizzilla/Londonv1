@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>London Explorer & Greggs Radar</title>
+  <title>London Explorer & Radar</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -54,15 +54,12 @@
     }
     .btn:active { background: #1d4ed8; }
 
-    /* Content Area: Sidebar + Map */
-    #main-content {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    /* Content Area */
+    #main-content { display: flex; flex: 1; overflow: hidden; }
 
+    /* Sidebar */
     #sidebar {
-      width: 300px;
+      width: 320px;
       background: #f8fafc;
       border-right: 1px solid #e2e8f0;
       display: flex;
@@ -70,7 +67,6 @@
       overflow-y: auto;
       z-index: 500;
     }
-
     #sidebar-header {
       padding: 12px 16px;
       background: #f1f5f9;
@@ -81,48 +77,39 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-
-    #sidebar-list {
-      list-style: none;
-    }
-
+    #sidebar-list { list-style: none; }
     .sidebar-item {
       padding: 12px 16px;
       border-bottom: 1px solid #e2e8f0;
       cursor: pointer;
       transition: background 0.15s ease;
     }
-
-    .sidebar-item:hover {
-      background: #e2e8f0;
-    }
-
-    .sidebar-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #0f172a;
-      margin-bottom: 4px;
-    }
-
+    .sidebar-item:hover { background: #e2e8f0; }
+    .sidebar-title { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+    .sidebar-sub { font-size: 12px; color: #64748b; margin-bottom: 6px; }
     .sidebar-badge {
       display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       color: #fff;
+      text-transform: uppercase;
     }
 
     #map { flex: 1; width: 100%; height: 100%; }
 
-    /* Custom SVG Pin Styles */
+    /* SVG Pin Styling */
     .custom-svg-pin { background: transparent; border: none; }
 
     /* Custom Popup Styles */
-    .leaflet-popup-content-wrapper { border-radius: 8px; }
-    .popup-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #0f172a; }
-    .popup-cat { font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
-    .popup-meta { font-size: 13px; color: #475569; }
+    .leaflet-popup-content-wrapper { border-radius: 8px; padding: 4px; max-width: 300px; }
+    .popup-title { font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 2px; }
+    .popup-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+    .popup-row { font-size: 12px; color: #334155; margin-bottom: 4px; line-height: 1.4; }
+    .popup-row strong { color: #0f172a; }
+    .popup-link { margin-top: 8px; font-size: 12px; font-weight: 600; }
+    .popup-link a { color: #2563eb; text-decoration: none; }
 
     /* Mobile Responsiveness */
     @media (max-width: 640px) {
@@ -138,18 +125,21 @@
     <input type="text" id="search-box" placeholder="Search locations..." onkeyup="filterMarkers()" />
     <select id="category-select" onchange="filterMarkers()">
       <option value="ALL">All Categories</option>
-      <option value="Greggs">Greggs Only</option>
-      <option value="Honest Burgers">Honest Burgers</option>
-      <option value="Pubs & Bars">Pubs & Bars</option>
-      <option value="Landmarks">Landmarks & Sightseeing</option>
-      <option value="Markets & Eats">Markets & Eats</option>
+      <option value="Iconic Landmarks">Iconic Landmarks</option>
+      <option value="Museums">Museums</option>
+      <option value="Historic Pubs">Historic Pubs & Bars</option>
+      <option value="Markets & Food Halls">Markets & Food Halls</option>
+      <option value="Shopping">Shopping & Streets</option>
+      <option value="Casual Dining">Casual Dining & Eats</option>
+      <option value="Fish & Chips">Fish & Chips</option>
+      <option value="Greggs">Greggs Radar</option>
     </select>
     <button class="btn" onclick="locateUser()">📍 Find Closest</button>
   </div>
 
   <div id="main-content">
     <div id="sidebar">
-      <div id="sidebar-header">Locations (<span id="location-count">0</span>)</div>
+      <div id="sidebar-header">Locations Shown (<span id="location-count">0</span>)</div>
       <ul id="sidebar-list"></ul>
     </div>
     <div id="map"></div>
@@ -162,11 +152,14 @@
 <script>
   // Color Palette per Category
   const categoryColors = {
-    "Greggs": "#f59e0b",          // Amber / Yellow
-    "Honest Burgers": "#ef4444",  // Red
-    "Pubs & Bars": "#8b5cf6",     // Purple
-    "Landmarks": "#3b82f6",       // Blue
-    "Markets & Eats": "#10b981"   // Green
+    "Iconic Landmarks": "#3b82f6",     // Blue
+    "Museums": "#06b6d4",              // Cyan
+    "Historic Pubs": "#8b5cf6",        // Purple
+    "Markets & Food Halls": "#10b981", // Green
+    "Shopping": "#ec4899",             // Pink
+    "Casual Dining": "#f97316",        // Orange
+    "Fish & Chips": "#ef4444",         // Red
+    "Greggs": "#f59e0b"                // Amber
   };
 
   // SVG Pin Generator
@@ -192,74 +185,130 @@
     maxZoom: 19
   }).addTo(map);
 
-  // Master Dataset
-  const locations = [
-    // Greggs Hubs
+  // Master Raw Location Data
+  const rawLocations = [
+    // Iconic Landmarks
+    { name: "Abbey Road Studios & Crosswalk", cat: "Iconic Landmarks", lat: 51.5320, lng: -0.1782, neighborhood: "St. John's Wood", address: "3 Abbey Rd, London NW8 9AY", setting: "Outdoors (Crosswalk & Studio Exterior)", reservations: "Not required", tube: "St. John's Wood (Jubilee Line)", hours: "Crosswalk 24/7; Shop Mon–Sat 9:30 AM–5:30 PM, Sun 10:00 AM–5:00 PM", bestTime: "Early morning (8:00 AM–9:00 AM) weekdays", worstTime: "Midday weekends (12:00 PM–3:00 PM)" },
+    { name: "Big Ben & Elizabeth Tower", cat: "Iconic Landmarks", lat: 51.5007, lng: -0.1246, neighborhood: "Westminster", address: "Parliament Square, London SW1A 0AA", setting: "Outdoors", reservations: "Not needed for exterior", tube: "Westminster (Jubilee, District, Circle Lines)", hours: "Accessible 24/7", bestTime: "Early morning (8:00 AM) or after sunset", worstTime: "Weekdays 11:30 AM–2:00 PM" },
+    { name: "Buckingham Palace", cat: "Iconic Landmarks", lat: 51.5014, lng: -0.1419, neighborhood: "St. James's / Westminster", address: "London SW1A 1AA", setting: "Outdoors", reservations: "Not required for exterior", tube: "Victoria, Green Park, or Hyde Park Corner", hours: "Exterior accessible 24/7", bestTime: "9:00 AM or 10:15 AM on Guard Change days", worstTime: "11:00 AM–12:30 PM on Guard Change days" },
+    { name: "Kensington Palace", cat: "Iconic Landmarks", lat: 51.5050, lng: -0.1878, neighborhood: "Kensington", address: "Kensington Gardens, London W8 4PX", setting: "Both (State Apartments indoors; Gardens outdoors)", reservations: "Recommended for interior entry", tube: "High Street Kensington or Queensway", hours: "Wed–Sun 10:00 AM–4:00 PM (Closed Mon–Tue)", bestTime: "Weekday openings at 10:00 AM", worstTime: "Weekend afternoons (1:00 PM–3:00 PM)" },
+    { name: "St. Paul's Cathedral", cat: "Iconic Landmarks", lat: 51.5138, lng: -0.0984, neighborhood: "The City of London", address: "St. Paul's Churchyard, London EC4M 8AD", setting: "Indoors", reservations: "Recommended", tube: "St. Paul's (Central Line) or Mansion House", hours: "Mon–Sat 8:30 AM–4:30 PM (Wed opens 10:00 AM). Closed Sun", bestTime: "Weekday mornings at 8:30 AM", worstTime: "Saturdays 11:00 AM–2:00 PM" },
+    { name: "Tower of London", cat: "Iconic Landmarks", lat: 51.5081, lng: -0.0759, neighborhood: "Tower Hill", address: "London EC3N 4AB", setting: "Both", reservations: "Essential timed ticket", tube: "Tower Hill (District, Circle Lines)", hours: "Daily 9:00 AM–4:30 PM", bestTime: "Tuesday–Thursday right at 9:00 AM", worstTime: "Weekend afternoons (11:30 AM–2:30 PM)" },
+    { name: "Westminster Abbey", cat: "Iconic Landmarks", lat: 51.4994, lng: -0.1273, neighborhood: "Westminster", address: "20 Deans Yd, London SW1P 3PA", setting: "Indoors", reservations: "Essential timed entry ticket", tube: "Westminster or St. James's Park", hours: "Mon–Fri 9:30 AM–3:30 PM, Sat 9:00 AM–3:00 PM. Closed Sun", bestTime: "Mon/Tue at 9:30 AM opening", worstTime: "Midday Saturdays & 11:00 AM tour drops" },
+
+    // Museums
+    { name: "The British Museum", cat: "Museums", lat: 51.5194, lng: -0.1270, neighborhood: "Bloomsbury", address: "Great Russell St, London WC1B 3DG", setting: "Indoors", reservations: "Required (Free timed pass)", tube: "Tottenham Court Road or Holborn", hours: "Daily 10:00 AM–5:00 PM (Fri until 8:30 PM)", bestTime: "Friday late openings (after 5:00 PM) or weekday 10:00 AM", worstTime: "Weekend afternoons (11:30 AM–3:30 PM)" },
+    { name: "Natural History Museum", cat: "Museums", lat: 51.4967, lng: -0.1764, neighborhood: "South Kensington", address: "Cromwell Rd, London SW7 5BD", setting: "Indoors", reservations: "Strongly recommended (Free timed pass)", tube: "South Kensington", hours: "Daily 10:00 AM–5:50 PM", bestTime: "Weekday mornings at 10:00 AM opening", worstTime: "Rainy weekend days & school holidays" },
+    { name: "Tate Modern", cat: "Museums", lat: 51.5076, lng: -0.0994, neighborhood: "Bankside / Southwark", address: "Bankside, London SE1 9TG", setting: "Indoors", reservations: "Free entry; booking for special exhibits", tube: "Blackfriars or Southwark", hours: "Daily 10:00 AM–6:00 PM", bestTime: "Weekday mornings before 11:30 AM", worstTime: "Saturday afternoons" },
+    { name: "Victoria and Albert Museum (V&A)", cat: "Museums", lat: 51.4966, lng: -0.1721, neighborhood: "South Kensington", address: "Cromwell Rd, London SW7 2RL", setting: "Indoors", reservations: "Recommended (Free timed pass)", tube: "South Kensington", hours: "Daily 10:00 AM–5:45 PM (Fri until 10:00 PM)", bestTime: "Friday evenings (6:00 PM–9:00 PM)", worstTime: "Saturday and Sunday afternoons" },
+
+    // Historic Pubs
+    { name: "Anchor Bankside", cat: "Historic Pubs", lat: 51.5063, lng: -0.0935, neighborhood: "Bankside / Southwark", address: "34 Park St, London SE1 9EF", setting: "Both", reservations: "Walk-ins standard for drinks", tube: "London Bridge or Monument", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday afternoons (2:00 PM–4:00 PM)", worstTime: "Sunny weekend evenings after 5:00 PM" },
+    { name: "Cahoots Underground", cat: "Historic Pubs", lat: 51.5123, lng: -0.1388, neighborhood: "Soho (Kingly Court)", address: "13 Kingly St, London W1B 5PG", setting: "Indoors (Subterranean 1940s Tube)", reservations: "Essential (Book weeks in advance)", tube: "Oxford Circus or Piccadilly Circus", hours: "Mon–Thu 3 PM–1 AM, Fri–Sat 1 PM–3 AM, Sun 2 PM–12 AM", bestTime: "Weekday early evening (4:00 PM–6:00 PM)", worstTime: "Friday & Saturday late nights" },
+    { name: "The Blackfriar", cat: "Historic Pubs", lat: 51.5121, lng: -0.1037, neighborhood: "Blackfriars / The City", address: "174 Queen Victoria St, London EC4V 4EG", setting: "Indoors (Art Nouveau)", reservations: "Walk-in friendly for drinks", tube: "Blackfriars", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "2:30 PM–5:00 PM weekdays", worstTime: "Weekday post-work rush (5:00 PM–8:00 PM)" },
+    { name: "The Churchill Arms", cat: "Historic Pubs", lat: 51.5068, lng: -0.1945, neighborhood: "Kensington", address: "119 Kensington Church St, London W8 7LN", setting: "Both", reservations: "Required for Thai restaurant; walk-in for pub", tube: "Notting Hill Gate", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Dusk/early evening in December", worstTime: "Friday & Saturday nights" },
+    { name: "The Devonshire", cat: "Historic Pubs", lat: 51.5113, lng: -0.1352, neighborhood: "Soho / Piccadilly", address: "39 Denman St, London W1D 7EL", setting: "Indoors", reservations: "Essential for grill; walk-in for pub bar", tube: "Piccadilly Circus", hours: "Mon–Sat 12:00 PM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "12:00 PM opening for Guinness", worstTime: "Weekday evenings (6:00 PM–9:00 PM)" },
+    { name: "The Dickens Inn", cat: "Historic Pubs", lat: 51.5065, lng: -0.0712, neighborhood: "St. Katharine Docks", address: "Marble Quay, 50 St Katharine's Way, E1W 1LA", setting: "Both", reservations: "Recommended for food; walk-in for pub", tube: "Tower Hill", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Mid-afternoon on weekdays", worstTime: "Warm weekend afternoons" },
+    { name: "The Lamb & Flag", cat: "Historic Pubs", lat: 51.5115, lng: -0.1257, neighborhood: "Covent Garden", address: "33 Rose St, London WC2E 9EB", setting: "Indoors", reservations: "No reservations (Walk-in only)", tube: "Covent Garden or Leicester Square", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday afternoons (2:00 PM–4:00 PM)", worstTime: "Thu & Fri after-work (5:30 PM–8:30 PM)" },
+    { name: "The Mayflower", cat: "Historic Pubs", lat: 51.5012, lng: -0.0531, neighborhood: "Rotherhithe", address: "117 Rotherhithe St, London SE16 4NF", setting: "Both (Thames river deck)", reservations: "Essential upstairs; walk-in downstairs", tube: "Rotherhithe or Bermondsey", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday lunch or early evening high tide", worstTime: "Sunday roast peak (1:00 PM–4:00 PM)" },
+    { name: "The Salisbury", cat: "Historic Pubs", lat: 51.5110, lng: -0.1280, neighborhood: "Covent Garden", address: "90 St Martin's Ln, London WC2N 4AP", setting: "Indoors (Victorian)", reservations: "Walk-ins welcome", tube: "Leicester Square", hours: "Mon–Sat 10:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "3:00 PM–5:00 PM on weekdays", worstTime: "Pre-theatre (6 PM–7:30 PM) & post-theatre" },
+    { name: "Ye Olde Cheshire Cheese", cat: "Historic Pubs", lat: 51.5143, lng: -0.1075, neighborhood: "Fleet Street / City", address: "145 Fleet St, London EC4A 2BP", setting: "Indoors (1667 Cellar)", reservations: "Walk-in only for bars", tube: "Blackfriars or City Thameslink", hours: "Mon–Sat 12:00 PM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "Weekday afternoons (2:00 PM–4:30 PM)", worstTime: "Thursday & Friday evenings" },
+    { name: "Ye Olde Mitre", cat: "Historic Pubs", lat: 51.5181, lng: -0.1070, neighborhood: "Holborn / Hatton Garden", address: "1 Ely Pl, London EC1N 6SJ", setting: "Indoors (Hidden alley)", reservations: "Walk-in only", tube: "Chancery Lane or Farringdon", hours: "Mon–Fri 11:00 AM–11:00 PM (Closed Sat & Sun)", bestTime: "Weekday mid-afternoons (2:00 PM–4:00 PM)", worstTime: "Weekends (Closed) and Friday post 5 PM" },
+
+    // Markets & Food Halls
+    { name: "Borough Market", cat: "Markets & Food Halls", lat: 51.5055, lng: -0.0905, neighborhood: "London Bridge", address: "London SE1 9AL", setting: "Covered outdoors / Semi-indoors", reservations: "Not required (Free)", tube: "London Bridge", hours: "Tue–Sat 10:00 AM–5:00 PM, Sun 10:00 AM–4:00 PM (Closed Mon)", bestTime: "Wed or Thu morning at 10:00 AM", worstTime: "Saturday 11:30 AM–3:30 PM" },
+    { name: "Camden Market", cat: "Markets & Food Halls", lat: 51.5416, lng: -0.1465, neighborhood: "Camden Town", address: "54-56 Camden Lock Pl, London NW1 8AF", setting: "Both", reservations: "Not required", tube: "Camden Town or Chalk Farm", hours: "Daily 10:00 AM–dusk (~6:00 PM)", bestTime: "Weekday mornings (10:00 AM–12:00 PM)", worstTime: "Saturday & Sunday afternoons" },
+    { name: "Old Spitalfields Market & Brick Lane", cat: "Markets & Food Halls", lat: 51.5197, lng: -0.0743, neighborhood: "Shoreditch / Spitalfields", address: "16 Horner Sq, London E1 6EW", setting: "Covered outdoor hall", reservations: "Not required", tube: "Liverpool Street or Aldgate East", hours: "Mon–Fri 10 AM–8 PM, Sat 10 AM–6 PM, Sun 10 AM–5 PM", bestTime: "Sunday 10:30 AM–1:00 PM", worstTime: "Saturday peak afternoon (2:00 PM–4:30 PM)" },
+    { name: "Portobello Road Market", cat: "Markets & Food Halls", lat: 51.5152, lng: -0.2057, neighborhood: "Notting Hill", address: "Portobello Rd, London W11 1LJ", setting: "Outdoors", reservations: "Not required", tube: "Notting Hill Gate or Ladbroke Grove", hours: "Full market Fri–Sat 9:00 AM–6:00 PM", bestTime: "Friday 9:30 AM–11:30 AM", worstTime: "Saturday 12:00 PM–3:30 PM" },
+    { name: "Southbank Centre Winter Market", cat: "Markets & Food Halls", lat: 51.5061, lng: -0.1165, neighborhood: "Southbank", address: "Belgrave Square, Queens Walk, London SE1 8XX", setting: "Outdoors (Promenade)", reservations: "Not required", tube: "Waterloo or Embankment", hours: "Sun–Thu 11 AM–10 PM, Fri–Sat 11 AM–11 PM (Nov–Dec)", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday evenings after 6:00 PM" },
+    { name: "Mercato Mayfair", cat: "Markets & Food Halls", lat: 51.5136, lng: -0.1524, neighborhood: "Mayfair", address: "St. Mark's Church, North Audley St, W1K 6ZA", setting: "Indoors (Victorian Church)", reservations: "Walk-ins only", tube: "Marble Arch or Bond Street", hours: "Mon–Thu 10 AM–11 PM, Fri–Sat 10 AM–12 AM, Sun 10 AM–10:30 PM", bestTime: "Weekday lunch (11:30 AM) or 3:00 PM off-peak", worstTime: "Friday and Saturday nights" },
+    { name: "Seven Dials Market", cat: "Markets & Food Halls", lat: 51.5138, lng: -0.1264, neighborhood: "Covent Garden", address: "35 Earlham St, London WC2H 9LD", setting: "Indoors (Former Warehouse)", reservations: "Walk-ins only", tube: "Covent Garden or Leicester Square", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 11:00 AM–10:00 PM", bestTime: "Weekdays at 11:30 AM or 3:00 PM–5:00 PM", worstTime: "Weekday lunch hour & weekend evenings" },
+
+    // Shopping
+    { name: "Carnaby Street", cat: "Shopping", lat: 51.5133, lng: -0.1388, neighborhood: "Soho", address: "Carnaby St, London W1F 9PB", setting: "Outdoors", reservations: "None", tube: "Oxford Circus or Piccadilly Circus", hours: "Mon–Sat 10:00 AM–7:00 PM, Sun 12:00 PM–6:00 PM", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday afternoon (1:00 PM–5:00 PM)" },
+    { name: "Chinatown", cat: "Shopping", lat: 51.5118, lng: -0.1311, neighborhood: "Soho / West End", address: "Gerrard St, London W1D 5PT", setting: "Outdoors", reservations: "None", tube: "Leicester Square", hours: "Area 24/7; Restaurants late daily", bestTime: "Weekday late afternoon / 5:00 PM", worstTime: "Friday & Saturday nights" },
+    { name: "Covent Garden Piazza & Neal's Yard", cat: "Shopping", lat: 51.5117, lng: -0.1240, neighborhood: "Covent Garden", address: "King St, WC2E 8RF & Neal's Yard, WC2H 9DP", setting: "Both", reservations: "None", tube: "Covent Garden", hours: "Piazza 24/7; Shops Mon–Sat 10 AM–8 PM, Sun 11 AM–6 PM", bestTime: "Weekday mornings before 10:30 AM", worstTime: "Weekend afternoons" },
+    { name: "Harrods", cat: "Shopping", lat: 51.4994, lng: -0.1635, neighborhood: "Knightsbridge", address: "87-135 Brompton Rd, London SW1X 7XL", setting: "Indoors", reservations: "None for entry; required for dining/tea", tube: "Knightsbridge (Piccadilly Line)", hours: "Mon–Sat 10:00 AM–9:00 PM, Sun 11:30 AM–6:00 PM", bestTime: "Weekday mornings at 10:00 AM", worstTime: "Saturday & Sunday afternoons" },
+    { name: "Oxford Street & Regent Street", cat: "Shopping", lat: 51.5152, lng: -0.1418, neighborhood: "Mayfair / Soho", address: "Oxford St & Regent St, London W1", setting: "Outdoors", reservations: "None", tube: "Oxford Circus or Bond Street", hours: "Mon–Sat 10:00 AM–8:00 PM, Sun 12:00 PM–6:00 PM", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday afternoons" },
+    { name: "Selfridges", cat: "Shopping", lat: 51.5144, lng: -0.1528, neighborhood: "Marylebone / Oxford St", address: "400 Oxford St, London W1A 1AB", setting: "Indoors", reservations: "None", tube: "Bond Street", hours: "Mon–Sat 10:00 AM–10:00 PM, Sun 11:30 AM–6:00 PM", bestTime: "Weekday mornings (10:00 AM–11:30 AM)", worstTime: "Saturday afternoon & Sunday browse hours" },
+
+    // Casual Dining
+    { name: "BAO Borough", cat: "Casual Dining", lat: 51.5052, lng: -0.0908, neighborhood: "Borough / Southwark", address: "13 Stoney St, London SE1 9AD", setting: "Indoors", reservations: "Recommended online; walk-ins counter", tube: "London Bridge", hours: "Mon–Sat 12 PM–10:30 PM, Sun 12 PM–9:30 PM", bestTime: "Weekday lunch opening at 12:00 PM", worstTime: "Friday evening post-work rush", specialty: "Fluffy classic pork bao buns & fried chicken" },
+    { name: "Bread Ahead Bakery", cat: "Casual Dining", lat: 51.5053, lng: -0.0901, neighborhood: "Borough Market", address: "Cathedral St, London SE1 9DE", setting: "Outdoor takeaway stall & shop", reservations: "None (Walk-up counter)", tube: "London Bridge", hours: "Tue–Sat 8:30 AM–5:00 PM, Sun 10:00 AM–4:00 PM", bestTime: "Morning before 10:30 AM", worstTime: "Saturday 1:00 PM–3:30 PM", specialty: "Overstuffed sourdough doughnuts" },
+    { name: "Chin Chin Ice Cream", cat: "Casual Dining", lat: 51.5130, lng: -0.1303, neighborhood: "Soho", address: "49 Greek St, London W1D 4EG", setting: "Indoors / Takeaway", reservations: "None", tube: "Tottenham Court Road or Leicester Sq", hours: "Daily 1:00 PM–10:00 PM", bestTime: "Weekday opening at 1:00 PM", worstTime: "Friday & Saturday late nights", specialty: "Liquid Nitrogen Desserts & Hot Chocolate" },
+    { name: "Honest Burgers (Covent Garden)", cat: "Casual Dining", lat: 51.5108, lng: -0.1215, neighborhood: "Covent Garden", address: "33 Southampton St, London WC2E 7HE", setting: "Indoors", reservations: "Walk-in focused", tube: "Covent Garden or Charing Cross", hours: "Daily 11:30 AM–10:30 PM", bestTime: "Off-peak hours (2:30 PM–5:00 PM)", worstTime: "12:30 PM–1:30 PM lunch rush", specialty: "Honest beef burger with rosemary chips" },
+    { name: "M.Manze Pie & Mash", cat: "Casual Dining", lat: 51.4981, lng: -0.0789, neighborhood: "Tower Bridge / Bermondsey", address: "87 Tower Bridge Rd, London SE1 4TW", setting: "Indoors (1902 Victorian Tiled)", reservations: "Walk-ins only", tube: "Borough or London Bridge", hours: "Mon–Sat 10:30 AM–6 PM, Sun 11 AM–4 PM", bestTime: "Early weekday lunch at 11:30 AM", worstTime: "Saturday midday", specialty: "Traditional minced beef pie, mash, & liquor sauce" },
+    { name: "My Old Dutch", cat: "Casual Dining", lat: 51.5170, lng: -0.1212, neighborhood: "Holborn", address: "131-132 High Holborn, London WC1V 6PX", setting: "Indoors", reservations: "Recommended on weekends; walk-ins weekdays", tube: "Holborn", hours: "Daily 11:00 AM–10:00 PM", bestTime: "Weekday mornings or 3:00 PM off-peak", worstTime: "Mondays (Discount Pancake Monday)", specialty: "Massive sweet and savory Dutch pancakes" },
+
+    // Fish & Chips
+    { name: "Fish Plaice", cat: "Fish & Chips", lat: 51.4941, lng: -0.1741, neighborhood: "South Kensington", address: "53 Old Brompton Rd, London SW7 3JS", setting: "Indoors / Takeaway", reservations: "Walk-in counter service", tube: "South Kensington", hours: "Mon–Sat 11:30 AM–10:30 PM, Sun 12 PM–9:30 PM", bestTime: "11:45 AM right after opening", worstTime: "1:00 PM museum lunch rush", specialty: "Beef dripping batter chippy" },
+    { name: "Golden Chippy", cat: "Fish & Chips", lat: 51.4776, lng: -0.0152, neighborhood: "Greenwich", address: "62 Greenwich High Rd, London SE10 8LF", setting: "Both", reservations: "Walk-ins welcome", tube: "Greenwich (DLR / Rail)", hours: "Mon–Sat 11:30 AM–10:00 PM, Sun 12 PM–9:00 PM", bestTime: "Weekday early dinner (5:00 PM)", worstTime: "Saturday dinner rush (6:30 PM–8:30 PM)", specialty: "Crispy cod/haddock with free salad" },
+    { name: "Poppies Fish & Chips", cat: "Fish & Chips", lat: 51.5131, lng: -0.1316, neighborhood: "Soho", address: "55-59 Old Compton St, London W1D 6HW", setting: "Indoors & Takeaway", reservations: "Recommended for sit-down", tube: "Leicester Square", hours: "Daily 11:00 AM–11:00 PM", bestTime: "Weekday lunch (11:30 AM–12:15 PM)", worstTime: "Friday night (6:00 PM–8:30 PM)", specialty: "1950s retro themed diner, newspaper wrap" },
+    { name: "Rock and Sole Plaice", cat: "Fish & Chips", lat: 51.5136, lng: -0.1252, neighborhood: "Covent Garden", address: "47 Endell St, London WC2H 9AJ", setting: "Both", reservations: "Walk-ins only", tube: "Covent Garden or Holborn", hours: "Mon–Sat 11:30 AM–10:30 PM, Sun 12 PM–10:00 PM", bestTime: "3:00 PM–5:00 PM off-peak", worstTime: "6:30 PM–8:30 PM dinner rush", specialty: "Est. 1871, 140-year-old peanut oil batter recipe" },
+    { name: "The Fryer's Delight", cat: "Fish & Chips", lat: 51.5196, lng: -0.1158, neighborhood: "Holborn / Bloomsbury", address: "19 Theobalds Rd, London WC1X 8SL", setting: "Indoors (Formica booths)", reservations: "Walk-in only", tube: "Holborn or Chancery Lane", hours: "Mon–Sat 12:00 PM–10:00 PM (Closed Sun)", bestTime: "12:00 PM opening", worstTime: "Friday dinner (6:00 PM–8:00 PM)", specialty: "Classic cabbie joint, tallow-fried chips" },
+    { name: "The SeaShell of Lisson Grove", cat: "Fish & Chips", lat: 51.5242, lng: -0.1668, neighborhood: "Marylebone", address: "49-51 Lisson Grove, London NW1 6UH", setting: "Indoors", reservations: "Recommended for dining room", tube: "Marylebone", hours: "Mon–Sat 12:00 PM–10:00 PM, Sun 12 PM–9:00 PM", bestTime: "Weekday lunch (12:00 PM–1:00 PM)", worstTime: "Friday & Saturday evening peak", specialty: "Upscale chippy, battered or panko crumbed" },
+
+    // Greggs Locations (Testing Fallback Generator Functionality)
     { name: "Greggs - Leicester Square", cat: "Greggs", lat: 51.5106, lng: -0.1306 },
-    { name: "Greggs - Strand / Charing Cross", cat: "Greggs", lat: 51.5085, lng: -0.1245 },
     { name: "Greggs - Victoria Station", cat: "Greggs", lat: 51.4952, lng: -0.1439 },
     { name: "Greggs - London Bridge", cat: "Greggs", lat: 51.5050, lng: -0.0860 },
-    { name: "Greggs - King's Cross", cat: "Greggs", lat: 51.5315, lng: -0.1243 },
-    { name: "Greggs - Oxford Street", cat: "Greggs", lat: 51.5152, lng: -0.1418 },
-    { name: "Greggs Outlet - Southwark", cat: "Greggs", lat: 51.5011, lng: -0.1015 },
-
-    // Honest Burgers
-    { name: "Honest Burgers Soho (Meard St)", cat: "Honest Burgers", lat: 51.5134, lng: -0.1329 },
-    { name: "Honest Burgers Borough Market", cat: "Honest Burgers", lat: 51.5053, lng: -0.0911 },
-    { name: "Honest Burgers Covent Garden", cat: "Honest Burgers", lat: 51.5118, lng: -0.1228 },
-    { name: "Honest Burgers King's Cross", cat: "Honest Burgers", lat: 51.5309, lng: -0.1225 },
-    { name: "Honest Burgers Oxford Circus", cat: "Honest Burgers", lat: 51.5159, lng: -0.1410 },
-    { name: "Honest Burgers Baker Street", cat: "Honest Burgers", lat: 51.5212, lng: -0.1571 },
-    { name: "Honest Burgers St Katharine Docks", cat: "Honest Burgers", lat: 51.5071, lng: -0.0725 },
-
-    // Pubs & Bars
-    { name: "Ye Olde Cheshire Cheese", cat: "Pubs & Bars", lat: 51.5143, lng: -0.1075 },
-    { name: "Ye Olde Mitre (Holborn)", cat: "Pubs & Bars", lat: 51.5181, lng: -0.1070 },
-    { name: "The Blackfriar", cat: "Pubs & Bars", lat: 51.5121, lng: -0.1037 },
-    { name: "Anchor Bankside", cat: "Pubs & Bars", lat: 51.5063, lng: -0.0935 },
-    { name: "The Mayflower (Rotherhithe)", cat: "Pubs & Bars", lat: 51.5012, lng: -0.0531 },
-    { name: "The Churchill Arms (Kensington)", cat: "Pubs & Bars", lat: 51.5068, lng: -0.1945 },
-    { name: "The Lamb & Flag (Covent Garden)", cat: "Pubs & Bars", lat: 51.5115, lng: -0.1257 },
-    { name: "The Dickens Inn", cat: "Pubs & Bars", lat: 51.5065, lng: -0.0712 },
-    { name: "Cahoots Underground", cat: "Pubs & Bars", lat: 51.5123, lng: -0.1388 },
-
-    // Landmarks
-    { name: "Tower of London", cat: "Landmarks", lat: 51.5081, lng: -0.0759 },
-    { name: "Big Ben / Westminster Palace", cat: "Landmarks", lat: 51.5007, lng: -0.1246 },
-    { name: "Westminster Abbey", cat: "Landmarks", lat: 51.4994, lng: -0.1273 },
-    { name: "Buckingham Palace", cat: "Landmarks", lat: 51.5014, lng: -0.1419 },
-    { name: "St. Paul's Cathedral", cat: "Landmarks", lat: 51.5138, lng: -0.0984 },
-    { name: "The British Museum", cat: "Landmarks", lat: 51.5194, lng: -0.1270 },
-    { name: "Natural History Museum", cat: "Landmarks", lat: 51.4967, lng: -0.1764 },
-    { name: "Royal Observatory Greenwich", cat: "Landmarks", lat: 51.4769, lng: -0.0005 },
-    { name: "Abbey Road Studios", cat: "Landmarks", lat: 51.5320, lng: -0.1782 },
-
-    // Markets & Eats
-    { name: "Borough Market", cat: "Markets & Eats", lat: 51.5055, lng: -0.0905 },
-    { name: "Seven Dials Market", cat: "Markets & Eats", lat: 51.5138, lng: -0.1264 },
-    { name: "Old Spitalfields Market", cat: "Markets & Eats", lat: 51.5197, lng: -0.0743 },
-    { name: "Camden Market", cat: "Markets & Eats", lat: 51.5416, lng: -0.1465 },
-    { name: "Portobello Road Market", cat: "Markets & Eats", lat: 51.5152, lng: -0.2057 },
-    { name: "Maltby Street Market", cat: "Markets & Eats", lat: 51.5005, lng: -0.0784 }
+    { name: "Greggs - King's Cross", cat: "Greggs", lat: 51.5315, lng: -0.1243 }
   ];
+
+  // Automatic Fallback Data Generator
+  function getFormattedLoc(loc) {
+    return {
+      name: loc.name,
+      cat: loc.cat,
+      lat: loc.lat,
+      lng: loc.lng,
+      neighborhood: loc.neighborhood || "Central London",
+      address: loc.address || "London, UK",
+      setting: loc.setting || "Indoors / Takeaway",
+      reservations: loc.reservations || "Walk-ins welcome (No booking needed)",
+      tube: loc.tube || "Nearby Tube Station",
+      hours: loc.hours || "Mon–Sat 7:00 AM–8:00 PM, Sun 8:00 AM–6:00 PM",
+      bestTime: loc.bestTime || "Early morning or off-peak hours (2:00 PM–4:00 PM)",
+      worstTime: loc.worstTime || "Midday peak hours (12:00 PM–2:00 PM)",
+      specialty: loc.specialty || ""
+    };
+  }
 
   let markerStore = [];
   let userMarker = null;
 
   // Render Markers & Initial Sidebar
   function loadMarkers() {
-    locations.forEach(loc => {
+    rawLocations.forEach(raw => {
+      const loc = getFormattedLoc(raw);
       const pinColor = categoryColors[loc.cat] || '#3b82f6';
       const customIcon = createPinIcon(pinColor);
 
       const m = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
-      m.bindPopup(`
+
+      // Construct Popup HTML with all structured fields
+      let popupHTML = `
         <div class="popup-title">${loc.name}</div>
-        <div class="popup-cat" style="color:${pinColor}">${loc.cat}</div>
-        <div class="popup-meta"><a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">Open in Google Maps</a></div>
-      `);
+        <div class="popup-cat" style="color:${pinColor}">${loc.cat} • ${loc.neighborhood}</div>
+        <div class="popup-row"><strong>Address:</strong> ${loc.address}</div>
+        <div class="popup-row"><strong>Tube:</strong> ${loc.tube}</div>
+        <div class="popup-row"><strong>Setting:</strong> ${loc.setting}</div>
+        <div class="popup-row"><strong>Reservations:</strong> ${loc.reservations}</div>
+        <div class="popup-row"><strong>Hours:</strong> ${loc.hours}</div>
+        <div class="popup-row"><strong>Best Time:</strong> ${loc.bestTime}</div>
+        <div class="popup-row"><strong>Worst Time:</strong> ${loc.worstTime}</div>
+      `;
+
+      if (loc.specialty) {
+        popupHTML += `<div class="popup-row"><strong>Specialty:</strong> ${loc.specialty}</div>`;
+      }
+
+      popupHTML += `<div class="popup-link"><a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">🗺️ Open Directions in Google Maps</a></div>`;
+
+      m.bindPopup(popupHTML);
       markerStore.push({ marker: m, data: loc, color: pinColor });
     });
+
     updateSidebar(markerStore);
   }
 
@@ -275,6 +324,7 @@
       li.className = 'sidebar-item';
       li.innerHTML = `
         <div class="sidebar-title">${item.data.name}</div>
+        <div class="sidebar-sub">📍 ${item.data.neighborhood} | 🚇 ${item.data.tube.split('(')[0]}</div>
         <span class="sidebar-badge" style="background-color: ${item.color}">${item.data.cat}</span>
       `;
       li.onclick = () => {
@@ -292,7 +342,9 @@
     const visibleItems = [];
 
     markerStore.forEach(item => {
-      const matchesSearch = item.data.name.toLowerCase().includes(searchVal);
+      const matchesSearch = item.data.name.toLowerCase().includes(searchVal) || 
+                            item.data.neighborhood.toLowerCase().includes(searchVal) ||
+                            item.data.tube.toLowerCase().includes(searchVal);
       const matchesCat = (catVal === 'ALL') || (item.data.cat === catVal);
 
       if (matchesSearch && matchesCat) {
@@ -332,7 +384,8 @@
         let closest = null;
         let minDistance = Infinity;
 
-        locations.forEach(loc => {
+        markerStore.forEach(item => {
+          const loc = item.data;
           const dist = map.distance([uLat, uLng], [loc.lat, loc.lng]);
           if (dist < minDistance) {
             minDistance = dist;
@@ -345,7 +398,7 @@
           alert(`Nearest spot is "${closest.name}" (${Math.round(minDistance)} meters away).`);
         }
       },
-      () => alert("Unable to retrieve your current location.")
+      () => alert("Unable to retrieve your current location. Please check GPS permissions.")
     );
   }
 
