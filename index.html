@@ -54,14 +54,81 @@
     }
     .btn:active { background: #1d4ed8; }
 
-    /* Map Display */
-    #map { flex: 1; width: 100%; }
+    /* Content Area: Sidebar + Map */
+    #main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #sidebar {
+      width: 300px;
+      background: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 500;
+    }
+
+    #sidebar-header {
+      padding: 12px 16px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #sidebar-list {
+      list-style: none;
+    }
+
+    .sidebar-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .sidebar-item:hover {
+      background: #e2e8f0;
+    }
+
+    .sidebar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+    }
+
+    #map { flex: 1; width: 100%; height: 100%; }
+
+    /* Custom SVG Pin Styles */
+    .custom-svg-pin { background: transparent; border: none; }
 
     /* Custom Popup Styles */
     .leaflet-popup-content-wrapper { border-radius: 8px; }
     .popup-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #0f172a; }
-    .popup-cat { font-size: 12px; font-weight: 600; color: #2563eb; text-transform: uppercase; margin-bottom: 6px; }
+    .popup-cat { font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
     .popup-meta { font-size: 13px; color: #475569; }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 640px) {
+      #main-content { flex-direction: column-reverse; }
+      #sidebar { width: 100%; height: 220px; border-right: none; border-top: 1px solid #e2e8f0; }
+    }
   </style>
 </head>
 <body>
@@ -79,23 +146,53 @@
     </select>
     <button class="btn" onclick="locateUser()">📍 Find Closest</button>
   </div>
-  <div id="map"></div>
+
+  <div id="main-content">
+    <div id="sidebar">
+      <div id="sidebar-header">Locations (<span id="location-count">0</span>)</div>
+      <ul id="sidebar-list"></ul>
+    </div>
+    <div id="map"></div>
+  </div>
 </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // Initialize Map centered on Central London
+  // Color Palette per Category
+  const categoryColors = {
+    "Greggs": "#f59e0b",          // Amber / Yellow
+    "Honest Burgers": "#ef4444",  // Red
+    "Pubs & Bars": "#8b5cf6",     // Purple
+    "Landmarks": "#3b82f6",       // Blue
+    "Markets & Eats": "#10b981"   // Green
+  };
+
+  // SVG Pin Generator
+  function createPinIcon(color) {
+    const svg = `<svg width="25" height="35" viewBox="0 0 25 35" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.5 0C5.596 0 0 5.596 0 12.5C0 21.875 12.5 35 12.5 35C12.5 35 25 21.875 25 12.5C25 5.596 19.404 0 12.5 0Z" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
+      <circle cx="12.5" cy="12.5" r="5" fill="#ffffff"/>
+    </svg>`;
+    return L.divIcon({
+      className: 'custom-svg-pin',
+      html: svg,
+      iconSize: [25, 35],
+      iconAnchor: [12.5, 35],
+      popupAnchor: [0, -30]
+    });
+  }
+
+  // Initialize Map
   const map = L.map('map').setView([51.5074, -0.1278], 13);
 
-  // Add OpenStreetMap Basemap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(map);
 
-  // Master Location Dataset
+  // Master Dataset
   const locations = [
     // Greggs Hubs
     { name: "Greggs - Leicester Square", cat: "Greggs", lat: 51.5106, lng: -0.1306 },
@@ -106,7 +203,7 @@
     { name: "Greggs - Oxford Street", cat: "Greggs", lat: 51.5152, lng: -0.1418 },
     { name: "Greggs Outlet - Southwark", cat: "Greggs", lat: 51.5011, lng: -0.1015 },
 
-    // Honest Burgers Branches
+    // Honest Burgers
     { name: "Honest Burgers Soho (Meard St)", cat: "Honest Burgers", lat: 51.5134, lng: -0.1329 },
     { name: "Honest Burgers Borough Market", cat: "Honest Burgers", lat: 51.5053, lng: -0.0911 },
     { name: "Honest Burgers Covent Garden", cat: "Honest Burgers", lat: 51.5118, lng: -0.1228 },
@@ -115,7 +212,7 @@
     { name: "Honest Burgers Baker Street", cat: "Honest Burgers", lat: 51.5212, lng: -0.1571 },
     { name: "Honest Burgers St Katharine Docks", cat: "Honest Burgers", lat: 51.5071, lng: -0.0725 },
 
-    // Historic Pubs & Bars
+    // Pubs & Bars
     { name: "Ye Olde Cheshire Cheese", cat: "Pubs & Bars", lat: 51.5143, lng: -0.1075 },
     { name: "Ye Olde Mitre (Holborn)", cat: "Pubs & Bars", lat: 51.5181, lng: -0.1070 },
     { name: "The Blackfriar", cat: "Pubs & Bars", lat: 51.5121, lng: -0.1037 },
@@ -126,7 +223,7 @@
     { name: "The Dickens Inn", cat: "Pubs & Bars", lat: 51.5065, lng: -0.0712 },
     { name: "Cahoots Underground", cat: "Pubs & Bars", lat: 51.5123, lng: -0.1388 },
 
-    // Major Landmarks & Museums
+    // Landmarks
     { name: "Tower of London", cat: "Landmarks", lat: 51.5081, lng: -0.0759 },
     { name: "Big Ben / Westminster Palace", cat: "Landmarks", lat: 51.5007, lng: -0.1246 },
     { name: "Westminster Abbey", cat: "Landmarks", lat: 51.4994, lng: -0.1273 },
@@ -137,7 +234,7 @@
     { name: "Royal Observatory Greenwich", cat: "Landmarks", lat: 51.4769, lng: -0.0005 },
     { name: "Abbey Road Studios", cat: "Landmarks", lat: 51.5320, lng: -0.1782 },
 
-    // Markets & Food
+    // Markets & Eats
     { name: "Borough Market", cat: "Markets & Eats", lat: 51.5055, lng: -0.0905 },
     { name: "Seven Dials Market", cat: "Markets & Eats", lat: 51.5138, lng: -0.1264 },
     { name: "Old Spitalfields Market", cat: "Markets & Eats", lat: 51.5197, lng: -0.0743 },
@@ -149,23 +246,50 @@
   let markerStore = [];
   let userMarker = null;
 
-  // Render Markers
+  // Render Markers & Initial Sidebar
   function loadMarkers() {
     locations.forEach(loc => {
-      const m = L.marker([loc.lat, loc.lng]).addTo(map);
+      const pinColor = categoryColors[loc.cat] || '#3b82f6';
+      const customIcon = createPinIcon(pinColor);
+
+      const m = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
       m.bindPopup(`
         <div class="popup-title">${loc.name}</div>
-        <div class="popup-cat">${loc.cat}</div>
+        <div class="popup-cat" style="color:${pinColor}">${loc.cat}</div>
         <div class="popup-meta"><a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">Open in Google Maps</a></div>
       `);
-      markerStore.push({ marker: m, data: loc });
+      markerStore.push({ marker: m, data: loc, color: pinColor });
+    });
+    updateSidebar(markerStore);
+  }
+
+  // Update Dynamic Sidebar
+  function updateSidebar(visibleItems) {
+    const listEl = document.getElementById('sidebar-list');
+    const countEl = document.getElementById('location-count');
+    listEl.innerHTML = '';
+    countEl.textContent = visibleItems.length;
+
+    visibleItems.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'sidebar-item';
+      li.innerHTML = `
+        <div class="sidebar-title">${item.data.name}</div>
+        <span class="sidebar-badge" style="background-color: ${item.color}">${item.data.cat}</span>
+      `;
+      li.onclick = () => {
+        map.setView([item.data.lat, item.data.lng], 16);
+        item.marker.openPopup();
+      };
+      listEl.appendChild(li);
     });
   }
 
-  // Search and Filter Functionality
+  // Filter Markers & Sidebar
   function filterMarkers() {
     const searchVal = document.getElementById('search-box').value.toLowerCase();
     const catVal = document.getElementById('category-select').value;
+    const visibleItems = [];
 
     markerStore.forEach(item => {
       const matchesSearch = item.data.name.toLowerCase().includes(searchVal);
@@ -173,13 +297,16 @@
 
       if (matchesSearch && matchesCat) {
         if (!map.hasLayer(item.marker)) map.addLayer(item.marker);
+        visibleItems.push(item);
       } else {
         if (map.hasLayer(item.marker)) map.removeLayer(item.marker);
       }
     });
+
+    updateSidebar(visibleItems);
   }
 
-  // Geolocation: Find Nearest Location
+  // Locate User GPS
   function locateUser() {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -193,7 +320,6 @@
 
         if (userMarker) map.removeLayer(userMarker);
 
-        // Add User Location Pulse Marker
         userMarker = L.circleMarker([uLat, uLng], {
           radius: 9,
           fillColor: '#2563eb',
@@ -203,7 +329,6 @@
           fillOpacity: 0.9
         }).addTo(map).bindPopup("<b>You Are Here</b>").openPopup();
 
-        // Calculate Closest Location
         let closest = null;
         let minDistance = Infinity;
 
@@ -220,7 +345,7 @@
           alert(`Nearest spot is "${closest.name}" (${Math.round(minDistance)} meters away).`);
         }
       },
-      () => alert("Unable to retrieve your current location. Make sure GPS permissions are allowed.")
+      () => alert("Unable to retrieve your current location.")
     );
   }
 
