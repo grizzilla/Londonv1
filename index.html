@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEam Ivy London Vaction Guide</title>
+  <title>Team Ivy London Vacation</title>
   <!-- Leaflet CSS for Map Rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -193,6 +193,7 @@
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 6px;
+      align-items: center;
     }
 
     .tag {
@@ -200,6 +201,8 @@
       padding: 3px 8px;
       border-radius: 12px;
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
     }
 
     .tag-category {
@@ -215,7 +218,18 @@
     .tag-dist {
       background: #f1f5f9;
       color: #475569;
+    }
+
+    .tag-directions {
+      background: var(--brand-blue);
+      color: white;
+      text-decoration: none;
       margin-left: auto;
+      transition: background 0.15s ease;
+    }
+
+    .tag-directions:hover {
+      background: var(--primary);
     }
 
     #map {
@@ -350,7 +364,7 @@
   <!-- Header & Controls -->
   <header>
     <div class="brand">
-      <span class="brand-badge">Soho</span> Central London Explorer
+      <span class="brand-badge">Soho</span> Team Ivy London Christmas Guide
     </div>
     
     <div class="controls-container">
@@ -359,7 +373,7 @@
         <input type="text" id="searchInput" placeholder="Search pub, museum, Greggs, chippy..." />
       </div>
 
-      <!-- Filter 1: Best Day/Time to Visit (Inserted directly between Search and Category) -->
+      <!-- Filter 1: Best Day/Time to Visit -->
       <select id="timeFilter" class="select-filter">
         <option value="ALL">Best Day/Time: All Times</option>
         <optgroup label="Monday">
@@ -399,7 +413,7 @@
         </optgroup>
       </select>
 
-      <!-- Filter 2: Category Dropdown (All historic, dining, culture, and Greggs options) -->
+      <!-- Filter 2: Category Dropdown -->
       <select id="categoryFilter" class="select-filter">
         <option value="ALL">Category: All Locations</option>
         <option value="Historic Pubs">Historic Pubs</option>
@@ -688,6 +702,9 @@
       }
 
       filtered.forEach(loc => {
+        // Construct dynamic Google Maps walking directions link
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}&travelmode=walking`;
+
         const card = document.createElement('div');
         card.className = 'location-card';
         card.id = `card-${loc.id}`;
@@ -696,18 +713,20 @@
           <div class="card-address">${loc.address}</div>
           <div class="card-meta">
             <span class="tag tag-category">${loc.category}</span>
-            <span class="tag tag-time">🕒 Best: ${loc.bestTime}</span>
+            <span class="tag tag-time">🕒 ${loc.bestTime}</span>
             <span class="tag tag-dist">${loc.distance} mi</span>
+            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="tag tag-directions" onclick="event.stopPropagation()">🚶 Walking Directions</a>
           </div>
         `;
 
         const marker = L.marker([loc.lat, loc.lng]).addTo(map);
         marker.bindPopup(`
-          <div style="font-family: sans-serif;">
+          <div style="font-family: sans-serif; padding: 2px;">
             <b style="color:#0f172a; font-size:1rem;">${loc.name}</b><br/>
             <span style="color:#64748b; font-size:0.85rem;">${loc.address}</span><br/>
-            <small><b>Category:</b> ${loc.category}</small><br/>
-            <small><b>Best Time:</b> ${loc.bestTime}</small>
+            <small style="color:#0369a1;"><b>Category:</b> ${loc.category}</small><br/>
+            <small style="color:#92400e;"><b>Best Time:</b> ${loc.bestTime}</small><br/><br/>
+            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; background:#005587; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.8rem; font-weight:bold;">🚶 Google Maps Walking Directions</a>
           </div>
         `);
 
