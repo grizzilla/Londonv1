@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>London Explorer & Greggs Radar</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #app-container { display: flex; flex-direction: column; height: 100vh; }
+
+    /* Top Control Bar */
+    #controls {
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    #search-box {
+      flex: 1 1 180px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 14px;
+    }
+    #category-select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 14px;
+    }
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:active { background: #1d4ed8; }
+
+    /* Map Display */
+    #map { flex: 1; width: 100%; }
+
+    /* Custom Popup Styles */
+    .leaflet-popup-content-wrapper { border-radius: 8px; }
+    .popup-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #0f172a; }
+    .popup-cat { font-size: 12px; font-weight: 600; color: #2563eb; text-transform: uppercase; margin-bottom: 6px; }
+    .popup-meta { font-size: 13px; color: #475569; }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <div id="controls">
+    <input type="text" id="search-box" placeholder="Search locations..." onkeyup="filterMarkers()" />
+    <select id="category-select" onchange="filterMarkers()">
+      <option value="ALL">All Categories</option>
+      <option value="Greggs">Greggs Only</option>
+      <option value="Honest Burgers">Honest Burgers</option>
+      <option value="Pubs & Bars">Pubs & Bars</option>
+      <option value="Landmarks">Landmarks & Sightseeing</option>
+      <option value="Markets & Eats">Markets & Eats</option>
+    </select>
+    <button class="btn" onclick="locateUser()">📍 Find Closest</button>
+  </div>
+  <div id="map"></div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Initialize Map centered on Central London
+  const map = L.map('map').setView([51.5074, -0.1278], 13);
+
+  // Add OpenStreetMap Basemap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Master Location Dataset
+  const locations = [
+    // Greggs Hubs
+    { name: "Greggs - Leicester Square", cat: "Greggs", lat: 51.5106, lng: -0.1306 },
+    { name: "Greggs - Strand / Charing Cross", cat: "Greggs", lat: 51.5085, lng: -0.1245 },
+    { name: "Greggs - Victoria Station", cat: "Greggs", lat: 51.4952, lng: -0.1439 },
+    { name: "Greggs - London Bridge", cat: "Greggs", lat: 51.5050, lng: -0.0860 },
+    { name: "Greggs - King's Cross", cat: "Greggs", lat: 51.5315, lng: -0.1243 },
+    { name: "Greggs - Oxford Street", cat: "Greggs", lat: 51.5152, lng: -0.1418 },
+    { name: "Greggs Outlet - Southwark", cat: "Greggs", lat: 51.5011, lng: -0.1015 },
+
+    // Honest Burgers Branches
+    { name: "Honest Burgers Soho (Meard St)", cat: "Honest Burgers", lat: 51.5134, lng: -0.1329 },
+    { name: "Honest Burgers Borough Market", cat: "Honest Burgers", lat: 51.5053, lng: -0.0911 },
+    { name: "Honest Burgers Covent Garden", cat: "Honest Burgers", lat: 51.5118, lng: -0.1228 },
+    { name: "Honest Burgers King's Cross", cat: "Honest Burgers", lat: 51.5309, lng: -0.1225 },
+    { name: "Honest Burgers Oxford Circus", cat: "Honest Burgers", lat: 51.5159, lng: -0.1410 },
+    { name: "Honest Burgers Baker Street", cat: "Honest Burgers", lat: 51.5212, lng: -0.1571 },
+    { name: "Honest Burgers St Katharine Docks", cat: "Honest Burgers", lat: 51.5071, lng: -0.0725 },
+
+    // Historic Pubs & Bars
+    { name: "Ye Olde Cheshire Cheese", cat: "Pubs & Bars", lat: 51.5143, lng: -0.1075 },
+    { name: "Ye Olde Mitre (Holborn)", cat: "Pubs & Bars", lat: 51.5181, lng: -0.1070 },
+    { name: "The Blackfriar", cat: "Pubs & Bars", lat: 51.5121, lng: -0.1037 },
+    { name: "Anchor Bankside", cat: "Pubs & Bars", lat: 51.5063, lng: -0.0935 },
+    { name: "The Mayflower (Rotherhithe)", cat: "Pubs & Bars", lat: 51.5012, lng: -0.0531 },
+    { name: "The Churchill Arms (Kensington)", cat: "Pubs & Bars", lat: 51.5068, lng: -0.1945 },
+    { name: "The Lamb & Flag (Covent Garden)", cat: "Pubs & Bars", lat: 51.5115, lng: -0.1257 },
+    { name: "The Dickens Inn", cat: "Pubs & Bars", lat: 51.5065, lng: -0.0712 },
+    { name: "Cahoots Underground", cat: "Pubs & Bars", lat: 51.5123, lng: -0.1388 },
+
+    // Major Landmarks & Museums
+    { name: "Tower of London", cat: "Landmarks", lat: 51.5081, lng: -0.0759 },
+    { name: "Big Ben / Westminster Palace", cat: "Landmarks", lat: 51.5007, lng: -0.1246 },
+    { name: "Westminster Abbey", cat: "Landmarks", lat: 51.4994, lng: -0.1273 },
+    { name: "Buckingham Palace", cat: "Landmarks", lat: 51.5014, lng: -0.1419 },
+    { name: "St. Paul's Cathedral", cat: "Landmarks", lat: 51.5138, lng: -0.0984 },
+    { name: "The British Museum", cat: "Landmarks", lat: 51.5194, lng: -0.1270 },
+    { name: "Natural History Museum", cat: "Landmarks", lat: 51.4967, lng: -0.1764 },
+    { name: "Royal Observatory Greenwich", cat: "Landmarks", lat: 51.4769, lng: -0.0005 },
+    { name: "Abbey Road Studios", cat: "Landmarks", lat: 51.5320, lng: -0.1782 },
+
+    // Markets & Food
+    { name: "Borough Market", cat: "Markets & Eats", lat: 51.5055, lng: -0.0905 },
+    { name: "Seven Dials Market", cat: "Markets & Eats", lat: 51.5138, lng: -0.1264 },
+    { name: "Old Spitalfields Market", cat: "Markets & Eats", lat: 51.5197, lng: -0.0743 },
+    { name: "Camden Market", cat: "Markets & Eats", lat: 51.5416, lng: -0.1465 },
+    { name: "Portobello Road Market", cat: "Markets & Eats", lat: 51.5152, lng: -0.2057 },
+    { name: "Maltby Street Market", cat: "Markets & Eats", lat: 51.5005, lng: -0.0784 }
+  ];
+
+  let markerStore = [];
+  let userMarker = null;
+
+  // Render Markers
+  function loadMarkers() {
+    locations.forEach(loc => {
+      const m = L.marker([loc.lat, loc.lng]).addTo(map);
+      m.bindPopup(`
+        <div class="popup-title">${loc.name}</div>
+        <div class="popup-cat">${loc.cat}</div>
+        <div class="popup-meta"><a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">Open in Google Maps</a></div>
+      `);
+      markerStore.push({ marker: m, data: loc });
+    });
+  }
+
+  // Search and Filter Functionality
+  function filterMarkers() {
+    const searchVal = document.getElementById('search-box').value.toLowerCase();
+    const catVal = document.getElementById('category-select').value;
+
+    markerStore.forEach(item => {
+      const matchesSearch = item.data.name.toLowerCase().includes(searchVal);
+      const matchesCat = (catVal === 'ALL') || (item.data.cat === catVal);
+
+      if (matchesSearch && matchesCat) {
+        if (!map.hasLayer(item.marker)) map.addLayer(item.marker);
+      } else {
+        if (map.hasLayer(item.marker)) map.removeLayer(item.marker);
+      }
+    });
+  }
+
+  // Geolocation: Find Nearest Location
+  function locateUser() {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const uLat = pos.coords.latitude;
+        const uLng = pos.coords.longitude;
+
+        if (userMarker) map.removeLayer(userMarker);
+
+        // Add User Location Pulse Marker
+        userMarker = L.circleMarker([uLat, uLng], {
+          radius: 9,
+          fillColor: '#2563eb',
+          color: '#ffffff',
+          weight: 3,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(map).bindPopup("<b>You Are Here</b>").openPopup();
+
+        // Calculate Closest Location
+        let closest = null;
+        let minDistance = Infinity;
+
+        locations.forEach(loc => {
+          const dist = map.distance([uLat, uLng], [loc.lat, loc.lng]);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closest = loc;
+          }
+        });
+
+        if (closest) {
+          map.setView([uLat, uLng], 15);
+          alert(`Nearest spot is "${closest.name}" (${Math.round(minDistance)} meters away).`);
+        }
+      },
+      () => alert("Unable to retrieve your current location. Make sure GPS permissions are allowed.")
+    );
+  }
+
+  loadMarkers();
+</script>
+</body>
+</html>
