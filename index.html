@@ -2,407 +2,720 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>London Explorer & Radar</title>
-
-  <!-- Leaflet CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greggs Finder - Soho & Central London</title>
+  <!-- Leaflet CSS for Map Rendering -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    #app-container { display: flex; flex-direction: column; height: 100vh; }
+    :root {
+      --primary: #005587;      /* Greggs Navy Blue */
+      --accent: #f2a900;       /* Greggs Warm Yellow */
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 10px;
+    }
 
-    /* Top Control Bar */
-    #controls {
-      background: #1e293b;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    #search-box {
-      flex: 1 1 180px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #fff;
-      font-size: 14px;
-    }
-    #category-select {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #fff;
-      font-size: 14px;
-    }
-    .btn {
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn:active { background: #1d4ed8; }
 
-    /* Content Area */
-    #main-content { display: flex; flex: 1; overflow: hidden; }
-
-    /* Sidebar */
-    #sidebar {
-      width: 320px;
-      background: #f8fafc;
-      border-right: 1px solid #e2e8f0;
+    body {
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- Header & Control Bar --- */
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .brand-badge {
+      background: var(--accent);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .controls-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-grow: 1;
+      max-width: 950px;
+    }
+
+    .search-bar {
+      flex: 1 1 200px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .select-filter {
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      outline: none;
+      font-size: 0.9rem;
+      background: white;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .btn-add {
+      background: var(--accent);
+      color: var(--primary);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background: #e09b00;
+      transform: translateY(-1px);
+    }
+
+    /* --- App Content Layout --- */
+    .main-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sidebar {
+      width: 380px;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
       z-index: 500;
     }
-    #sidebar-header {
+
+    .results-count {
       padding: 12px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
       background: #f1f5f9;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 12px;
-      font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
     }
-    #sidebar-list { list-style: none; }
-    .sidebar-item {
-      padding: 12px 16px;
-      border-bottom: 1px solid #e2e8f0;
+
+    .location-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .location-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: all 0.2s ease;
+      position: relative;
     }
-    .sidebar-item:hover { background: #e2e8f0; }
-    .sidebar-title { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
-    .sidebar-sub { font-size: 12px; color: #64748b; margin-bottom: 6px; }
-    .sidebar-badge {
-      display: inline-block;
-      font-size: 10px;
+
+    .location-card:hover, .location-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 85, 135, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .card-title {
       font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: #fff;
-      text-transform: uppercase;
+      font-size: 1rem;
+      color: var(--primary);
+      margin-bottom: 4px;
     }
 
-    #map { flex: 1; width: 100%; height: 100%; }
+    .card-address {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
 
-    /* SVG Pin Styling */
-    .custom-svg-pin { background: transparent; border: none; }
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
 
-    /* Custom Popup Styles */
-    .leaflet-popup-content-wrapper { border-radius: 8px; padding: 4px; max-width: 300px; }
-    .popup-title { font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 2px; }
-    .popup-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-    .popup-row { font-size: 12px; color: #334155; margin-bottom: 4px; line-height: 1.4; }
-    .popup-row strong { color: #0f172a; }
-    .popup-link { margin-top: 8px; font-size: 12px; font-weight: 600; }
-    .popup-link a { color: #2563eb; text-decoration: none; }
+    .tag {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
 
-    /* Mobile Responsiveness */
-    @media (max-width: 640px) {
-      #main-content { flex-direction: column-reverse; }
-      #sidebar { width: 100%; height: 220px; border-right: none; border-top: 1px solid #e2e8f0; }
+    .tag-category {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .tag-time {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .tag-dist {
+      background: #f1f5f9;
+      color: #475569;
+      margin-left: auto;
+    }
+
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #e5e3df;
+    }
+
+    /* --- Modal Dialog --- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-group input, .form-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 850px) {
+      .main-layout {
+        flex-direction: column-reverse;
+      }
+      .sidebar {
+        width: 100%;
+        height: 45vh;
+      }
+      #map {
+        height: 55vh;
+      }
     }
   </style>
 </head>
 <body>
 
-<div id="app-container">
-  <div id="controls">
-    <input type="text" id="search-box" placeholder="Search locations..." onkeyup="filterMarkers()" />
-    <select id="category-select" onchange="filterMarkers()">
-      <option value="ALL">All Categories</option>
-      <option value="Iconic Landmarks">Iconic Landmarks</option>
-      <option value="Museums">Museums</option>
-      <option value="Historic Pubs">Historic Pubs & Bars</option>
-      <option value="Markets & Food Halls">Markets & Food Halls</option>
-      <option value="Shopping">Shopping & Streets</option>
-      <option value="Casual Dining">Casual Dining & Eats</option>
-      <option value="Fish & Chips">Fish & Chips</option>
-      <option value="Greggs">Greggs Radar</option>
-    </select>
-    <button class="btn" onclick="locateUser()">📍 Find Closest</button>
-  </div>
+  <!-- Header & Controls -->
+  <header>
+    <div class="brand">
+      <span class="brand-badge">Greggs</span> London Soho Finder
+    </div>
+    
+    <div class="controls-container">
+      <!-- Search Input -->
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search location or address..." />
+      </div>
 
-  <div id="main-content">
-    <div id="sidebar">
-      <div id="sidebar-header">Locations Shown (<span id="location-count">0</span>)</div>
-      <ul id="sidebar-list"></ul>
+      <!-- Filter 1: Best Day/Time to Visit (Inserted right after search bar) -->
+      <select id="timeFilter" class="select-filter">
+        <option value="ALL">Best Day/Time: All Times</option>
+        <optgroup label="Monday">
+          <option value="Monday Morning">Monday Morning</option>
+          <option value="Monday Afternoon">Monday Afternoon</option>
+          <option value="Monday Evening">Monday Evening</option>
+        </optgroup>
+        <optgroup label="Tuesday">
+          <option value="Tuesday Morning">Tuesday Morning</option>
+          <option value="Tuesday Afternoon">Tuesday Afternoon</option>
+          <option value="Tuesday Evening">Tuesday Evening</option>
+        </optgroup>
+        <optgroup label="Wednesday">
+          <option value="Wednesday Morning">Wednesday Morning</option>
+          <option value="Wednesday Afternoon">Wednesday Afternoon</option>
+          <option value="Wednesday Evening">Wednesday Evening</option>
+        </optgroup>
+        <optgroup label="Thursday">
+          <option value="Thursday Morning">Thursday Morning</option>
+          <option value="Thursday Afternoon">Thursday Afternoon</option>
+          <option value="Thursday Evening">Thursday Evening</option>
+        </optgroup>
+        <optgroup label="Friday">
+          <option value="Friday Morning">Friday Morning</option>
+          <option value="Friday Afternoon">Friday Afternoon</option>
+          <option value="Friday Evening">Friday Evening</option>
+        </optgroup>
+        <optgroup label="Saturday">
+          <option value="Saturday Morning">Saturday Morning</option>
+          <option value="Saturday Afternoon">Saturday Afternoon</option>
+          <option value="Saturday Evening">Saturday Evening</option>
+        </optgroup>
+        <optgroup label="Sunday">
+          <option value="Sunday Morning">Sunday Morning</option>
+          <option value="Sunday Afternoon">Sunday Afternoon</option>
+          <option value="Sunday Evening">Sunday Evening</option>
+        </optgroup>
+      </select>
+
+      <!-- Filter 2: Category Dropdown -->
+      <select id="categoryFilter" class="select-filter">
+        <option value="ALL">Category: All Types</option>
+        <option value="Standard Store">Standard Store</option>
+        <option value="Flagship & Late Night">Flagship & Late Night</option>
+        <option value="Underground / Station">Underground / Station</option>
+        <option value="Express Store">Express Store</option>
+        <option value="Outlet">Outlet</option>
+      </select>
+
+      <!-- Add Location Button -->
+      <button class="btn-add" id="openAddModalBtn">
+        <span>+</span> Add Location
+      </button>
+    </div>
+  </header>
+
+  <!-- Main App View -->
+  <div class="main-layout">
+    <div class="sidebar">
+      <div class="results-count">
+        <span id="countDisplay">Showing 0 locations</span>
+        <span>Sorted by distance from Soho</span>
+      </div>
+      <div class="location-list" id="locationList"></div>
     </div>
     <div id="map"></div>
   </div>
-</div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Modal for Adding New Location -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add New Greggs Location</h3>
+        <button class="modal-close" id="closeAddModalBtn">&times;</button>
+      </div>
+      <form id="addLocationForm">
+        <div class="form-group">
+          <label for="newTitle">Store Name / Reference</label>
+          <input type="text" id="newTitle" placeholder="e.g. Greggs Soho Square" required />
+        </div>
+        <div class="form-group">
+          <label for="newAddress">Address / Area</label>
+          <input type="text" id="newAddress" placeholder="e.g. 12 Soho Square, W1D 3QE" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newCategory">Category</label>
+            <select id="newCategory" required>
+              <option value="Standard Store">Standard Store</option>
+              <option value="Flagship & Late Night">Flagship & Late Night</option>
+              <option value="Underground / Station">Underground / Station</option>
+              <option value="Express Store">Express Store</option>
+              <option value="Outlet">Outlet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newBestTime">Best Day/Time to Visit</label>
+            <select id="newBestTime" required>
+              <option value="Monday Morning">Monday Morning</option>
+              <option value="Monday Afternoon">Monday Afternoon</option>
+              <option value="Monday Evening">Monday Evening</option>
+              <option value="Tuesday Morning">Tuesday Morning</option>
+              <option value="Tuesday Afternoon">Tuesday Afternoon</option>
+              <option value="Tuesday Evening">Tuesday Evening</option>
+              <option value="Wednesday Morning">Wednesday Morning</option>
+              <option value="Wednesday Afternoon">Wednesday Afternoon</option>
+              <option value="Wednesday Evening">Wednesday Evening</option>
+              <option value="Thursday Morning">Thursday Morning</option>
+              <option value="Thursday Afternoon">Thursday Afternoon</option>
+              <option value="Thursday Evening">Thursday Evening</option>
+              <option value="Friday Morning">Friday Morning</option>
+              <option value="Friday Afternoon">Friday Afternoon</option>
+              <option value="Friday Evening">Friday Evening</option>
+              <option value="Saturday Morning">Saturday Morning</option>
+              <option value="Saturday Afternoon">Saturday Afternoon</option>
+              <option value="Saturday Evening">Saturday Evening</option>
+              <option value="Sunday Morning">Sunday Morning</option>
+              <option value="Sunday Afternoon">Sunday Afternoon</option>
+              <option value="Sunday Evening">Sunday Evening</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newLat">Latitude</label>
+            <input type="number" step="any" id="newLat" placeholder="51.5137" required />
+          </div>
+          <div class="form-group">
+            <label for="newLng">Longitude</label>
+            <input type="number" step="any" id="newLng" placeholder="-0.1338" required />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Save & Populate</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<script>
-  // Color Palette per Category
-  const categoryColors = {
-    "Iconic Landmarks": "#3b82f6",     // Blue
-    "Museums": "#06b6d4",              // Cyan
-    "Historic Pubs": "#8b5cf6",        // Purple
-    "Markets & Food Halls": "#10b981", // Green
-    "Shopping": "#ec4899",             // Pink
-    "Casual Dining": "#f97316",        // Orange
-    "Fish & Chips": "#ef4444",         // Red
-    "Greggs": "#f59e0b"                // Amber
-  };
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Soho Center Benchmark Coordinates
+    const SOHO_LAT = 51.5137;
+    const SOHO_LNG = -0.1338;
 
-  // SVG Pin Generator
-  function createPinIcon(color) {
-    const svg = `<svg width="25" height="35" viewBox="0 0 25 35" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12.5 0C5.596 0 0 5.596 0 12.5C0 21.875 12.5 35 12.5 35C12.5 35 25 21.875 25 12.5C25 5.596 19.404 0 12.5 0Z" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
-      <circle cx="12.5" cy="12.5" r="5" fill="#ffffff"/>
-    </svg>`;
-    return L.divIcon({
-      className: 'custom-svg-pin',
-      html: svg,
-      iconSize: [25, 35],
-      iconAnchor: [12.5, 35],
-      popupAnchor: [0, -30]
-    });
-  }
+    // Dataset of 52 Greggs locations in & surrounding Soho / Central London
+    let locations = [
+      { id: 1, name: "Greggs Leicester Square", address: "1 Leicester Sq, WC2H 7NA", category: "Flagship & Late Night", bestTime: "Friday Evening", lat: 51.5103, lng: -0.1302 },
+      { id: 2, name: "Greggs @ Primark Oxford St", address: "14-28 Oxford St, W1D 1AU", category: "Standard Store", bestTime: "Monday Afternoon", lat: 51.5165, lng: -0.1315 },
+      { id: 3, name: "Greggs Tottenham Court Rd", address: "101 Tottenham Court Rd, W1T 4TT", category: "Standard Store", bestTime: "Tuesday Morning", lat: 51.5208, lng: -0.1345 },
+      { id: 4, name: "Greggs Piccadilly Circus", address: "48 Regent St, W1B 5RA", category: "Flagship & Late Night", bestTime: "Saturday Evening", lat: 51.5101, lng: -0.1362 },
+      { id: 5, name: "Greggs Strand", address: "421-422 Strand, WC2R 0PS", category: "Flagship & Late Night", bestTime: "Thursday Afternoon", lat: 51.5098, lng: -0.1235 },
+      { id: 6, name: "Greggs Great Portland St", address: "94 Great Portland St, W1W 7NU", category: "Standard Store", bestTime: "Monday Morning", lat: 51.5201, lng: -0.1425 },
+      { id: 7, name: "Greggs Embankment Stn", address: "Embankment Underground, WC2N 6NS", category: "Underground / Station", bestTime: "Wednesday Morning", lat: 51.5071, lng: -0.1223 },
+      { id: 8, name: "Greggs Kingsway", address: "60 Kingsway, WC2A 3JB", category: "Standard Store", bestTime: "Tuesday Afternoon", lat: 51.5159, lng: -0.1195 },
+      { id: 9, name: "Greggs High Holborn", address: "9 Chancery Lane, WC1V 6DR", category: "Standard Store", bestTime: "Wednesday Afternoon", lat: 51.5178, lng: -0.1118 },
+      { id: 10, name: "Greggs Holborn Leather Ln", address: "81 Leather Ln, EC1N 7TS", category: "Express Store", bestTime: "Thursday Morning", lat: 51.5209, lng: -0.1092 },
+      { id: 11, name: "Greggs Oxford Circus", address: "250 Regent St, W1B 3BR", category: "Standard Store", bestTime: "Saturday Afternoon", lat: 51.5151, lng: -0.1418 },
+      { id: 12, name: "Greggs Warren Street", address: "120 Warren St, W1T 5LY", category: "Standard Store", bestTime: "Friday Morning", lat: 51.5242, lng: -0.1381 },
+      { id: 13, name: "Greggs Westminster Underground", address: "Westminster Station, SW1A 2JR", category: "Underground / Station", bestTime: "Monday Evening", lat: 51.5011, lng: -0.1252 },
+      { id: 14, name: "Greggs Victoria Palmer St", address: "U29 Palmer St, SW1H 0PH", category: "Standard Store", bestTime: "Tuesday Evening", lat: 51.4981, lng: -0.1345 },
+      { id: 15, name: "Greggs Victoria St", address: "165 Victoria St, SW1E 5NA", category: "Standard Store", bestTime: "Wednesday Evening", lat: 51.4965, lng: -0.1412 },
+      { id: 16, name: "Greggs Victoria Coach Stn", address: "U1 London Victoria Coach, SW1W 9TP", category: "Underground / Station", bestTime: "Sunday Afternoon", lat: 51.4925, lng: -0.1481 },
+      { id: 17, name: "Greggs Pimlico", address: "111 Lupus St, SW1V 3EN", category: "Standard Store", bestTime: "Sunday Morning", lat: 51.4878, lng: -0.1362 },
+      { id: 18, name: "Greggs Euston Road", address: "180 Euston Rd, NW1 2AL", category: "Express Store", bestTime: "Thursday Evening", lat: 51.5269, lng: -0.1292 },
+      { id: 19, name: "Greggs Euston Station", address: "Euston Station Concourse, NW1 2RT", category: "Underground / Station", bestTime: "Friday Afternoon", lat: 51.5281, lng: -0.1331 },
+      { id: 20, name: "Greggs Robert St Outlet", address: "100 Robert St, NW1 3QP", category: "Outlet", bestTime: "Saturday Morning", lat: 51.5275, lng: -0.1402 },
+      { id: 21, name: "Greggs Marylebone Stn", address: "Marylebone Station, NW1 6JJ", category: "Underground / Station", bestTime: "Monday Morning", lat: 51.5225, lng: -0.1631 },
+      { id: 22, name: "Greggs Baker Street", address: "211 Baker St, NW1 6XE", category: "Standard Store", bestTime: "Tuesday Morning", lat: 51.5238, lng: -0.1578 },
+      { id: 23, name: "Greggs St Pancras Intl", address: "St Pancras Intl Concourse, N1C 4QP", category: "Underground / Station", bestTime: "Wednesday Morning", lat: 51.5305, lng: -0.1259 },
+      { id: 24, name: "Greggs King's Cross Stn", address: "King's Cross Station, N1 9AL", category: "Underground / Station", bestTime: "Thursday Afternoon", lat: 51.5318, lng: -0.1241 },
+      { id: 25, name: "Greggs Camden High St", address: "128 Camden High St, NW1 0LU", category: "Standard Store", bestTime: "Saturday Afternoon", lat: 51.5391, lng: -0.1425 },
+      { id: 26, name: "Greggs Farringdon Rd", address: "45 Farringdon Rd, EC1M 3JB", category: "Express Store", bestTime: "Friday Morning", lat: 51.5208, lng: -0.1051 },
+      { id: 27, name: "Greggs Clerkenwell Rd", address: "102 Clerkenwell Rd, EC1M 5SA", category: "Standard Store", bestTime: "Monday Afternoon", lat: 51.5228, lng: -0.1012 },
+      { id: 28, name: "Greggs Waterloo Station", address: "Waterloo Station Concourse, SE1 7LY", category: "Underground / Station", bestTime: "Friday Evening", lat: 51.5031, lng: -0.1132 },
+      { id: 29, name: "Greggs Waterloo Rd", address: "108 Waterloo Rd, SE1 8SB", category: "Standard Store", bestTime: "Thursday Morning", lat: 51.5015, lng: -0.1110 },
+      { id: 30, name: "Greggs Southwark St", address: "50 Southwark St, SE1 1UN", category: "Express Store", bestTime: "Tuesday Afternoon", lat: 51.5042, lng: -0.0975 },
+      { id: 31, name: "Greggs Borough High St", address: "110 Borough High St, SE1 1LB", category: "Standard Store", bestTime: "Wednesday Afternoon", lat: 51.5021, lng: -0.0901 },
+      { id: 32, name: "Greggs London Bridge SU53", address: "SU53 London Bridge Station, SE1 9SP", category: "Underground / Station", bestTime: "Monday Evening", lat: 51.5052, lng: -0.0862 },
+      { id: 33, name: "Greggs London Bridge U8", address: "U8 London Bridge Station, SE1 9SP", category: "Underground / Station", bestTime: "Tuesday Evening", lat: 51.5048, lng: -0.0858 },
+      { id: 34, name: "Greggs London Bridge SU45", address: "SU45 London Bridge Station, SE1 9SP", category: "Underground / Station", bestTime: "Wednesday Evening", lat: 51.5045, lng: -0.0852 },
+      { id: 35, name: "Greggs Cannon St", address: "Arch 1 Dowgate Hill, EC4N 6AP", category: "Express Store", bestTime: "Thursday Evening", lat: 51.5112, lng: -0.0905 },
+      { id: 36, name: "Greggs Cheapside", address: "49 Cheapside, EC2V 6AT", category: "Standard Store", bestTime: "Friday Afternoon", lat: 51.5135, lng: -0.0928 },
+      { id: 37, name: "Greggs Eastcheap", address: "3 Eastcheap, EC3M 1AG", category: "Standard Store", bestTime: "Monday Morning", lat: 51.5108, lng: -0.0842 },
+      { id: 38, name: "Greggs Old Broad St", address: "83 Old Broad St, EC2M 1PR", category: "Standard Store", bestTime: "Tuesday Morning", lat: 51.5155, lng: -0.0845 },
+      { id: 39, name: "Greggs Bishopsgate", address: "154 Bishopsgate, EC2M 4LN", category: "Standard Store", bestTime: "Wednesday Morning", lat: 51.5171, lng: -0.0805 },
+      { id: 40, name: "Greggs Liverpool St Stn", address: "U26 Liverpool Street Station, EC2M 7PY", category: "Underground / Station", bestTime: "Thursday Morning", lat: 51.5181, lng: -0.0818 },
+      { id: 41, name: "Greggs Finsbury Sq", address: "50 Finsbury Square, EC2A 1HD", category: "Express Store", bestTime: "Friday Afternoon", lat: 51.5211, lng: -0.0872 },
+      { id: 42, name: "Greggs City Rd", address: "91 City Rd, EC1Y 1BD", category: "Standard Store", bestTime: "Saturday Morning", lat: 51.5252, lng: -0.0882 },
+      { id: 43, name: "Greggs Aldgate High St", address: "74 Aldgate High St, EC3N 1BD", category: "Standard Store", bestTime: "Sunday Evening", lat: 51.5142, lng: -0.0751 },
+      { id: 44, name: "Greggs Elephant & Castle", address: "Elephant & Castle Centre, SE1 6TE", category: "Standard Store", bestTime: "Sunday Afternoon", lat: 51.4948, lng: -0.1005 },
+      { id: 45, name: "Greggs Vauxhall Station", address: "Vauxhall Bus Station, SW8 1SJ", category: "Underground / Station", bestTime: "Monday Afternoon", lat: 51.4859, lng: -0.1238 },
+      { id: 46, name: "Greggs Praed Street", address: "148 Praed St, W2 1JN", category: "Standard Store", bestTime: "Tuesday Evening", lat: 51.5171, lng: -0.1738 },
+      { id: 47, name: "Greggs Paddington Stn", address: "Paddington Station Concourse, W2 1HA", category: "Underground / Station", bestTime: "Wednesday Afternoon", lat: 51.5162, lng: -0.1762 },
+      { id: 48, name: "Greggs Edgware Road", address: "240 Edgware Rd, W2 1DW", category: "Standard Store", bestTime: "Thursday Evening", lat: 51.5195, lng: -0.1685 },
+      { id: 49, name: "Greggs Bayswater", address: "68 Queensway, W2 3RL", category: "Standard Store", bestTime: "Friday Evening", lat: 51.5112, lng: -0.1872 },
+      { id: 50, name: "Greggs Kensington High St", address: "112 Kensington High St, W8 4SG", category: "Standard Store", bestTime: "Saturday Morning", lat: 51.5008, lng: -0.1925 },
+      { id: 51, name: "Greggs Earl's Court", address: "212 Earls Court Rd, SW5 9QA", category: "Express Store", bestTime: "Sunday Morning", lat: 51.4918, lng: -0.1952 },
+      { id: 52, name: "Greggs Hammersmith Broadway", address: "28 Broadway Centre, W6 9YD", category: "Underground / Station", bestTime: "Saturday Evening", lat: 51.4928, lng: -0.2241 }
+    ];
 
-  // Initialize Map
-  const map = L.map('map').setView([51.5074, -0.1278], 13);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 19
-  }).addTo(map);
-
-  // Master Raw Location Data
-  const rawLocations = [
-    // Iconic Landmarks
-    { name: "Abbey Road Studios & Crosswalk", cat: "Iconic Landmarks", lat: 51.5320, lng: -0.1782, neighborhood: "St. John's Wood", address: "3 Abbey Rd, London NW8 9AY", setting: "Outdoors (Crosswalk & Studio Exterior)", reservations: "Not required", tube: "St. John's Wood (Jubilee Line)", hours: "Crosswalk 24/7; Shop Mon–Sat 9:30 AM–5:30 PM, Sun 10:00 AM–5:00 PM", bestTime: "Early morning (8:00 AM–9:00 AM) weekdays", worstTime: "Midday weekends (12:00 PM–3:00 PM)" },
-    { name: "Big Ben & Elizabeth Tower", cat: "Iconic Landmarks", lat: 51.5007, lng: -0.1246, neighborhood: "Westminster", address: "Parliament Square, London SW1A 0AA", setting: "Outdoors", reservations: "Not needed for exterior", tube: "Westminster (Jubilee, District, Circle Lines)", hours: "Accessible 24/7", bestTime: "Early morning (8:00 AM) or after sunset", worstTime: "Weekdays 11:30 AM–2:00 PM" },
-    { name: "Buckingham Palace", cat: "Iconic Landmarks", lat: 51.5014, lng: -0.1419, neighborhood: "St. James's / Westminster", address: "London SW1A 1AA", setting: "Outdoors", reservations: "Not required for exterior", tube: "Victoria, Green Park, or Hyde Park Corner", hours: "Exterior accessible 24/7", bestTime: "9:00 AM or 10:15 AM on Guard Change days", worstTime: "11:00 AM–12:30 PM on Guard Change days" },
-    { name: "Kensington Palace", cat: "Iconic Landmarks", lat: 51.5050, lng: -0.1878, neighborhood: "Kensington", address: "Kensington Gardens, London W8 4PX", setting: "Both (State Apartments indoors; Gardens outdoors)", reservations: "Recommended for interior entry", tube: "High Street Kensington or Queensway", hours: "Wed–Sun 10:00 AM–4:00 PM (Closed Mon–Tue)", bestTime: "Weekday openings at 10:00 AM", worstTime: "Weekend afternoons (1:00 PM–3:00 PM)" },
-    { name: "St. Paul's Cathedral", cat: "Iconic Landmarks", lat: 51.5138, lng: -0.0984, neighborhood: "The City of London", address: "St. Paul's Churchyard, London EC4M 8AD", setting: "Indoors", reservations: "Recommended", tube: "St. Paul's (Central Line) or Mansion House", hours: "Mon–Sat 8:30 AM–4:30 PM (Wed opens 10:00 AM). Closed Sun", bestTime: "Weekday mornings at 8:30 AM", worstTime: "Saturdays 11:00 AM–2:00 PM" },
-    { name: "Tower of London", cat: "Iconic Landmarks", lat: 51.5081, lng: -0.0759, neighborhood: "Tower Hill", address: "London EC3N 4AB", setting: "Both", reservations: "Essential timed ticket", tube: "Tower Hill (District, Circle Lines)", hours: "Daily 9:00 AM–4:30 PM", bestTime: "Tuesday–Thursday right at 9:00 AM", worstTime: "Weekend afternoons (11:30 AM–2:30 PM)" },
-    { name: "Westminster Abbey", cat: "Iconic Landmarks", lat: 51.4994, lng: -0.1273, neighborhood: "Westminster", address: "20 Deans Yd, London SW1P 3PA", setting: "Indoors", reservations: "Essential timed entry ticket", tube: "Westminster or St. James's Park", hours: "Mon–Fri 9:30 AM–3:30 PM, Sat 9:00 AM–3:00 PM. Closed Sun", bestTime: "Mon/Tue at 9:30 AM opening", worstTime: "Midday Saturdays & 11:00 AM tour drops" },
-
-    // Museums
-    { name: "The British Museum", cat: "Museums", lat: 51.5194, lng: -0.1270, neighborhood: "Bloomsbury", address: "Great Russell St, London WC1B 3DG", setting: "Indoors", reservations: "Required (Free timed pass)", tube: "Tottenham Court Road or Holborn", hours: "Daily 10:00 AM–5:00 PM (Fri until 8:30 PM)", bestTime: "Friday late openings (after 5:00 PM) or weekday 10:00 AM", worstTime: "Weekend afternoons (11:30 AM–3:30 PM)" },
-    { name: "Natural History Museum", cat: "Museums", lat: 51.4967, lng: -0.1764, neighborhood: "South Kensington", address: "Cromwell Rd, London SW7 5BD", setting: "Indoors", reservations: "Strongly recommended (Free timed pass)", tube: "South Kensington", hours: "Daily 10:00 AM–5:50 PM", bestTime: "Weekday mornings at 10:00 AM opening", worstTime: "Rainy weekend days & school holidays" },
-    { name: "Tate Modern", cat: "Museums", lat: 51.5076, lng: -0.0994, neighborhood: "Bankside / Southwark", address: "Bankside, London SE1 9TG", setting: "Indoors", reservations: "Free entry; booking for special exhibits", tube: "Blackfriars or Southwark", hours: "Daily 10:00 AM–6:00 PM", bestTime: "Weekday mornings before 11:30 AM", worstTime: "Saturday afternoons" },
-    { name: "Victoria and Albert Museum (V&A)", cat: "Museums", lat: 51.4966, lng: -0.1721, neighborhood: "South Kensington", address: "Cromwell Rd, London SW7 2RL", setting: "Indoors", reservations: "Recommended (Free timed pass)", tube: "South Kensington", hours: "Daily 10:00 AM–5:45 PM (Fri until 10:00 PM)", bestTime: "Friday evenings (6:00 PM–9:00 PM)", worstTime: "Saturday and Sunday afternoons" },
-
-    // Historic Pubs
-    { name: "Anchor Bankside", cat: "Historic Pubs", lat: 51.5063, lng: -0.0935, neighborhood: "Bankside / Southwark", address: "34 Park St, London SE1 9EF", setting: "Both", reservations: "Walk-ins standard for drinks", tube: "London Bridge or Monument", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday afternoons (2:00 PM–4:00 PM)", worstTime: "Sunny weekend evenings after 5:00 PM" },
-    { name: "Cahoots Underground", cat: "Historic Pubs", lat: 51.5123, lng: -0.1388, neighborhood: "Soho (Kingly Court)", address: "13 Kingly St, London W1B 5PG", setting: "Indoors (Subterranean 1940s Tube)", reservations: "Essential (Book weeks in advance)", tube: "Oxford Circus or Piccadilly Circus", hours: "Mon–Thu 3 PM–1 AM, Fri–Sat 1 PM–3 AM, Sun 2 PM–12 AM", bestTime: "Weekday early evening (4:00 PM–6:00 PM)", worstTime: "Friday & Saturday late nights" },
-    { name: "The Blackfriar", cat: "Historic Pubs", lat: 51.5121, lng: -0.1037, neighborhood: "Blackfriars / The City", address: "174 Queen Victoria St, London EC4V 4EG", setting: "Indoors (Art Nouveau)", reservations: "Walk-in friendly for drinks", tube: "Blackfriars", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "2:30 PM–5:00 PM weekdays", worstTime: "Weekday post-work rush (5:00 PM–8:00 PM)" },
-    { name: "The Churchill Arms", cat: "Historic Pubs", lat: 51.5068, lng: -0.1945, neighborhood: "Kensington", address: "119 Kensington Church St, London W8 7LN", setting: "Both", reservations: "Required for Thai restaurant; walk-in for pub", tube: "Notting Hill Gate", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Dusk/early evening in December", worstTime: "Friday & Saturday nights" },
-    { name: "The Devonshire", cat: "Historic Pubs", lat: 51.5113, lng: -0.1352, neighborhood: "Soho / Piccadilly", address: "39 Denman St, London W1D 7EL", setting: "Indoors", reservations: "Essential for grill; walk-in for pub bar", tube: "Piccadilly Circus", hours: "Mon–Sat 12:00 PM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "12:00 PM opening for Guinness", worstTime: "Weekday evenings (6:00 PM–9:00 PM)" },
-    { name: "The Dickens Inn", cat: "Historic Pubs", lat: 51.5065, lng: -0.0712, neighborhood: "St. Katharine Docks", address: "Marble Quay, 50 St Katharine's Way, E1W 1LA", setting: "Both", reservations: "Recommended for food; walk-in for pub", tube: "Tower Hill", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Mid-afternoon on weekdays", worstTime: "Warm weekend afternoons" },
-    { name: "The Lamb & Flag", cat: "Historic Pubs", lat: 51.5115, lng: -0.1257, neighborhood: "Covent Garden", address: "33 Rose St, London WC2E 9EB", setting: "Indoors", reservations: "No reservations (Walk-in only)", tube: "Covent Garden or Leicester Square", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday afternoons (2:00 PM–4:00 PM)", worstTime: "Thu & Fri after-work (5:30 PM–8:30 PM)" },
-    { name: "The Mayflower", cat: "Historic Pubs", lat: 51.5012, lng: -0.0531, neighborhood: "Rotherhithe", address: "117 Rotherhithe St, London SE16 4NF", setting: "Both (Thames river deck)", reservations: "Essential upstairs; walk-in downstairs", tube: "Rotherhithe or Bermondsey", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "Weekday lunch or early evening high tide", worstTime: "Sunday roast peak (1:00 PM–4:00 PM)" },
-    { name: "The Salisbury", cat: "Historic Pubs", lat: 51.5110, lng: -0.1280, neighborhood: "Covent Garden", address: "90 St Martin's Ln, London WC2N 4AP", setting: "Indoors (Victorian)", reservations: "Walk-ins welcome", tube: "Leicester Square", hours: "Mon–Sat 10:00 AM–11:00 PM, Sun 12:00 PM–10:30 PM", bestTime: "3:00 PM–5:00 PM on weekdays", worstTime: "Pre-theatre (6 PM–7:30 PM) & post-theatre" },
-    { name: "Ye Olde Cheshire Cheese", cat: "Historic Pubs", lat: 51.5143, lng: -0.1075, neighborhood: "Fleet Street / City", address: "145 Fleet St, London EC4A 2BP", setting: "Indoors (1667 Cellar)", reservations: "Walk-in only for bars", tube: "Blackfriars or City Thameslink", hours: "Mon–Sat 12:00 PM–11:00 PM, Sun 12:00 PM–10:00 PM", bestTime: "Weekday afternoons (2:00 PM–4:30 PM)", worstTime: "Thursday & Friday evenings" },
-    { name: "Ye Olde Mitre", cat: "Historic Pubs", lat: 51.5181, lng: -0.1070, neighborhood: "Holborn / Hatton Garden", address: "1 Ely Pl, London EC1N 6SJ", setting: "Indoors (Hidden alley)", reservations: "Walk-in only", tube: "Chancery Lane or Farringdon", hours: "Mon–Fri 11:00 AM–11:00 PM (Closed Sat & Sun)", bestTime: "Weekday mid-afternoons (2:00 PM–4:00 PM)", worstTime: "Weekends (Closed) and Friday post 5 PM" },
-
-    // Markets & Food Halls
-    { name: "Borough Market", cat: "Markets & Food Halls", lat: 51.5055, lng: -0.0905, neighborhood: "London Bridge", address: "London SE1 9AL", setting: "Covered outdoors / Semi-indoors", reservations: "Not required (Free)", tube: "London Bridge", hours: "Tue–Sat 10:00 AM–5:00 PM, Sun 10:00 AM–4:00 PM (Closed Mon)", bestTime: "Wed or Thu morning at 10:00 AM", worstTime: "Saturday 11:30 AM–3:30 PM" },
-    { name: "Camden Market", cat: "Markets & Food Halls", lat: 51.5416, lng: -0.1465, neighborhood: "Camden Town", address: "54-56 Camden Lock Pl, London NW1 8AF", setting: "Both", reservations: "Not required", tube: "Camden Town or Chalk Farm", hours: "Daily 10:00 AM–dusk (~6:00 PM)", bestTime: "Weekday mornings (10:00 AM–12:00 PM)", worstTime: "Saturday & Sunday afternoons" },
-    { name: "Old Spitalfields Market & Brick Lane", cat: "Markets & Food Halls", lat: 51.5197, lng: -0.0743, neighborhood: "Shoreditch / Spitalfields", address: "16 Horner Sq, London E1 6EW", setting: "Covered outdoor hall", reservations: "Not required", tube: "Liverpool Street or Aldgate East", hours: "Mon–Fri 10 AM–8 PM, Sat 10 AM–6 PM, Sun 10 AM–5 PM", bestTime: "Sunday 10:30 AM–1:00 PM", worstTime: "Saturday peak afternoon (2:00 PM–4:30 PM)" },
-    { name: "Portobello Road Market", cat: "Markets & Food Halls", lat: 51.5152, lng: -0.2057, neighborhood: "Notting Hill", address: "Portobello Rd, London W11 1LJ", setting: "Outdoors", reservations: "Not required", tube: "Notting Hill Gate or Ladbroke Grove", hours: "Full market Fri–Sat 9:00 AM–6:00 PM", bestTime: "Friday 9:30 AM–11:30 AM", worstTime: "Saturday 12:00 PM–3:30 PM" },
-    { name: "Southbank Centre Winter Market", cat: "Markets & Food Halls", lat: 51.5061, lng: -0.1165, neighborhood: "Southbank", address: "Belgrave Square, Queens Walk, London SE1 8XX", setting: "Outdoors (Promenade)", reservations: "Not required", tube: "Waterloo or Embankment", hours: "Sun–Thu 11 AM–10 PM, Fri–Sat 11 AM–11 PM (Nov–Dec)", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday evenings after 6:00 PM" },
-    { name: "Mercato Mayfair", cat: "Markets & Food Halls", lat: 51.5136, lng: -0.1524, neighborhood: "Mayfair", address: "St. Mark's Church, North Audley St, W1K 6ZA", setting: "Indoors (Victorian Church)", reservations: "Walk-ins only", tube: "Marble Arch or Bond Street", hours: "Mon–Thu 10 AM–11 PM, Fri–Sat 10 AM–12 AM, Sun 10 AM–10:30 PM", bestTime: "Weekday lunch (11:30 AM) or 3:00 PM off-peak", worstTime: "Friday and Saturday nights" },
-    { name: "Seven Dials Market", cat: "Markets & Food Halls", lat: 51.5138, lng: -0.1264, neighborhood: "Covent Garden", address: "35 Earlham St, London WC2H 9LD", setting: "Indoors (Former Warehouse)", reservations: "Walk-ins only", tube: "Covent Garden or Leicester Square", hours: "Mon–Sat 11:00 AM–11:00 PM, Sun 11:00 AM–10:00 PM", bestTime: "Weekdays at 11:30 AM or 3:00 PM–5:00 PM", worstTime: "Weekday lunch hour & weekend evenings" },
-
-    // Shopping
-    { name: "Carnaby Street", cat: "Shopping", lat: 51.5133, lng: -0.1388, neighborhood: "Soho", address: "Carnaby St, London W1F 9PB", setting: "Outdoors", reservations: "None", tube: "Oxford Circus or Piccadilly Circus", hours: "Mon–Sat 10:00 AM–7:00 PM, Sun 12:00 PM–6:00 PM", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday afternoon (1:00 PM–5:00 PM)" },
-    { name: "Chinatown", cat: "Shopping", lat: 51.5118, lng: -0.1311, neighborhood: "Soho / West End", address: "Gerrard St, London W1D 5PT", setting: "Outdoors", reservations: "None", tube: "Leicester Square", hours: "Area 24/7; Restaurants late daily", bestTime: "Weekday late afternoon / 5:00 PM", worstTime: "Friday & Saturday nights" },
-    { name: "Covent Garden Piazza & Neal's Yard", cat: "Shopping", lat: 51.5117, lng: -0.1240, neighborhood: "Covent Garden", address: "King St, WC2E 8RF & Neal's Yard, WC2H 9DP", setting: "Both", reservations: "None", tube: "Covent Garden", hours: "Piazza 24/7; Shops Mon–Sat 10 AM–8 PM, Sun 11 AM–6 PM", bestTime: "Weekday mornings before 10:30 AM", worstTime: "Weekend afternoons" },
-    { name: "Harrods", cat: "Shopping", lat: 51.4994, lng: -0.1635, neighborhood: "Knightsbridge", address: "87-135 Brompton Rd, London SW1X 7XL", setting: "Indoors", reservations: "None for entry; required for dining/tea", tube: "Knightsbridge (Piccadilly Line)", hours: "Mon–Sat 10:00 AM–9:00 PM, Sun 11:30 AM–6:00 PM", bestTime: "Weekday mornings at 10:00 AM", worstTime: "Saturday & Sunday afternoons" },
-    { name: "Oxford Street & Regent Street", cat: "Shopping", lat: 51.5152, lng: -0.1418, neighborhood: "Mayfair / Soho", address: "Oxford St & Regent St, London W1", setting: "Outdoors", reservations: "None", tube: "Oxford Circus or Bond Street", hours: "Mon–Sat 10:00 AM–8:00 PM, Sun 12:00 PM–6:00 PM", bestTime: "Weekday twilights (4:30 PM–6:00 PM)", worstTime: "Saturday afternoons" },
-    { name: "Selfridges", cat: "Shopping", lat: 51.5144, lng: -0.1528, neighborhood: "Marylebone / Oxford St", address: "400 Oxford St, London W1A 1AB", setting: "Indoors", reservations: "None", tube: "Bond Street", hours: "Mon–Sat 10:00 AM–10:00 PM, Sun 11:30 AM–6:00 PM", bestTime: "Weekday mornings (10:00 AM–11:30 AM)", worstTime: "Saturday afternoon & Sunday browse hours" },
-
-    // Casual Dining
-    { name: "BAO Borough", cat: "Casual Dining", lat: 51.5052, lng: -0.0908, neighborhood: "Borough / Southwark", address: "13 Stoney St, London SE1 9AD", setting: "Indoors", reservations: "Recommended online; walk-ins counter", tube: "London Bridge", hours: "Mon–Sat 12 PM–10:30 PM, Sun 12 PM–9:30 PM", bestTime: "Weekday lunch opening at 12:00 PM", worstTime: "Friday evening post-work rush", specialty: "Fluffy classic pork bao buns & fried chicken" },
-    { name: "Bread Ahead Bakery", cat: "Casual Dining", lat: 51.5053, lng: -0.0901, neighborhood: "Borough Market", address: "Cathedral St, London SE1 9DE", setting: "Outdoor takeaway stall & shop", reservations: "None (Walk-up counter)", tube: "London Bridge", hours: "Tue–Sat 8:30 AM–5:00 PM, Sun 10:00 AM–4:00 PM", bestTime: "Morning before 10:30 AM", worstTime: "Saturday 1:00 PM–3:30 PM", specialty: "Overstuffed sourdough doughnuts" },
-    { name: "Chin Chin Ice Cream", cat: "Casual Dining", lat: 51.5130, lng: -0.1303, neighborhood: "Soho", address: "49 Greek St, London W1D 4EG", setting: "Indoors / Takeaway", reservations: "None", tube: "Tottenham Court Road or Leicester Sq", hours: "Daily 1:00 PM–10:00 PM", bestTime: "Weekday opening at 1:00 PM", worstTime: "Friday & Saturday late nights", specialty: "Liquid Nitrogen Desserts & Hot Chocolate" },
-    { name: "Honest Burgers (Covent Garden)", cat: "Casual Dining", lat: 51.5108, lng: -0.1215, neighborhood: "Covent Garden", address: "33 Southampton St, London WC2E 7HE", setting: "Indoors", reservations: "Walk-in focused", tube: "Covent Garden or Charing Cross", hours: "Daily 11:30 AM–10:30 PM", bestTime: "Off-peak hours (2:30 PM–5:00 PM)", worstTime: "12:30 PM–1:30 PM lunch rush", specialty: "Honest beef burger with rosemary chips" },
-    { name: "M.Manze Pie & Mash", cat: "Casual Dining", lat: 51.4981, lng: -0.0789, neighborhood: "Tower Bridge / Bermondsey", address: "87 Tower Bridge Rd, London SE1 4TW", setting: "Indoors (1902 Victorian Tiled)", reservations: "Walk-ins only", tube: "Borough or London Bridge", hours: "Mon–Sat 10:30 AM–6 PM, Sun 11 AM–4 PM", bestTime: "Early weekday lunch at 11:30 AM", worstTime: "Saturday midday", specialty: "Traditional minced beef pie, mash, & liquor sauce" },
-    { name: "My Old Dutch", cat: "Casual Dining", lat: 51.5170, lng: -0.1212, neighborhood: "Holborn", address: "131-132 High Holborn, London WC1V 6PX", setting: "Indoors", reservations: "Recommended on weekends; walk-ins weekdays", tube: "Holborn", hours: "Daily 11:00 AM–10:00 PM", bestTime: "Weekday mornings or 3:00 PM off-peak", worstTime: "Mondays (Discount Pancake Monday)", specialty: "Massive sweet and savory Dutch pancakes" },
-
-    // Fish & Chips
-    { name: "Fish Plaice", cat: "Fish & Chips", lat: 51.4941, lng: -0.1741, neighborhood: "South Kensington", address: "53 Old Brompton Rd, London SW7 3JS", setting: "Indoors / Takeaway", reservations: "Walk-in counter service", tube: "South Kensington", hours: "Mon–Sat 11:30 AM–10:30 PM, Sun 12 PM–9:30 PM", bestTime: "11:45 AM right after opening", worstTime: "1:00 PM museum lunch rush", specialty: "Beef dripping batter chippy" },
-    { name: "Golden Chippy", cat: "Fish & Chips", lat: 51.4776, lng: -0.0152, neighborhood: "Greenwich", address: "62 Greenwich High Rd, London SE10 8LF", setting: "Both", reservations: "Walk-ins welcome", tube: "Greenwich (DLR / Rail)", hours: "Mon–Sat 11:30 AM–10:00 PM, Sun 12 PM–9:00 PM", bestTime: "Weekday early dinner (5:00 PM)", worstTime: "Saturday dinner rush (6:30 PM–8:30 PM)", specialty: "Crispy cod/haddock with free salad" },
-    { name: "Poppies Fish & Chips", cat: "Fish & Chips", lat: 51.5131, lng: -0.1316, neighborhood: "Soho", address: "55-59 Old Compton St, London W1D 6HW", setting: "Indoors & Takeaway", reservations: "Recommended for sit-down", tube: "Leicester Square", hours: "Daily 11:00 AM–11:00 PM", bestTime: "Weekday lunch (11:30 AM–12:15 PM)", worstTime: "Friday night (6:00 PM–8:30 PM)", specialty: "1950s retro themed diner, newspaper wrap" },
-    { name: "Rock and Sole Plaice", cat: "Fish & Chips", lat: 51.5136, lng: -0.1252, neighborhood: "Covent Garden", address: "47 Endell St, London WC2H 9AJ", setting: "Both", reservations: "Walk-ins only", tube: "Covent Garden or Holborn", hours: "Mon–Sat 11:30 AM–10:30 PM, Sun 12 PM–10:00 PM", bestTime: "3:00 PM–5:00 PM off-peak", worstTime: "6:30 PM–8:30 PM dinner rush", specialty: "Est. 1871, 140-year-old peanut oil batter recipe" },
-    { name: "The Fryer's Delight", cat: "Fish & Chips", lat: 51.5196, lng: -0.1158, neighborhood: "Holborn / Bloomsbury", address: "19 Theobalds Rd, London WC1X 8SL", setting: "Indoors (Formica booths)", reservations: "Walk-in only", tube: "Holborn or Chancery Lane", hours: "Mon–Sat 12:00 PM–10:00 PM (Closed Sun)", bestTime: "12:00 PM opening", worstTime: "Friday dinner (6:00 PM–8:00 PM)", specialty: "Classic cabbie joint, tallow-fried chips" },
-    { name: "The SeaShell of Lisson Grove", cat: "Fish & Chips", lat: 51.5242, lng: -0.1668, neighborhood: "Marylebone", address: "49-51 Lisson Grove, London NW1 6UH", setting: "Indoors", reservations: "Recommended for dining room", tube: "Marylebone", hours: "Mon–Sat 12:00 PM–10:00 PM, Sun 12 PM–9:00 PM", bestTime: "Weekday lunch (12:00 PM–1:00 PM)", worstTime: "Friday & Saturday evening peak", specialty: "Upscale chippy, battered or panko crumbed" },
-
-    // Greggs Locations (Testing Fallback Generator Functionality)
-    { name: "Greggs - Leicester Square", cat: "Greggs", lat: 51.5106, lng: -0.1306 },
-    { name: "Greggs - Victoria Station", cat: "Greggs", lat: 51.4952, lng: -0.1439 },
-    { name: "Greggs - London Bridge", cat: "Greggs", lat: 51.5050, lng: -0.0860 },
-    { name: "Greggs - King's Cross", cat: "Greggs", lat: 51.5315, lng: -0.1243 }
-  ];
-
-  // Automatic Fallback Data Generator
-  function getFormattedLoc(loc) {
-    return {
-      name: loc.name,
-      cat: loc.cat,
-      lat: loc.lat,
-      lng: loc.lng,
-      neighborhood: loc.neighborhood || "Central London",
-      address: loc.address || "London, UK",
-      setting: loc.setting || "Indoors / Takeaway",
-      reservations: loc.reservations || "Walk-ins welcome (No booking needed)",
-      tube: loc.tube || "Nearby Tube Station",
-      hours: loc.hours || "Mon–Sat 7:00 AM–8:00 PM, Sun 8:00 AM–6:00 PM",
-      bestTime: loc.bestTime || "Early morning or off-peak hours (2:00 PM–4:00 PM)",
-      worstTime: loc.worstTime || "Midday peak hours (12:00 PM–2:00 PM)",
-      specialty: loc.specialty || ""
-    };
-  }
-
-  let markerStore = [];
-  let userMarker = null;
-
-  // Render Markers & Initial Sidebar
-  function loadMarkers() {
-    rawLocations.forEach(raw => {
-      const loc = getFormattedLoc(raw);
-      const pinColor = categoryColors[loc.cat] || '#3b82f6';
-      const customIcon = createPinIcon(pinColor);
-
-      const m = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
-
-      // Construct Popup HTML with all structured fields
-      let popupHTML = `
-        <div class="popup-title">${loc.name}</div>
-        <div class="popup-cat" style="color:${pinColor}">${loc.cat} • ${loc.neighborhood}</div>
-        <div class="popup-row"><strong>Address:</strong> ${loc.address}</div>
-        <div class="popup-row"><strong>Tube:</strong> ${loc.tube}</div>
-        <div class="popup-row"><strong>Setting:</strong> ${loc.setting}</div>
-        <div class="popup-row"><strong>Reservations:</strong> ${loc.reservations}</div>
-        <div class="popup-row"><strong>Hours:</strong> ${loc.hours}</div>
-        <div class="popup-row"><strong>Best Time:</strong> ${loc.bestTime}</div>
-        <div class="popup-row"><strong>Worst Time:</strong> ${loc.worstTime}</div>
-      `;
-
-      if (loc.specialty) {
-        popupHTML += `<div class="popup-row"><strong>Specialty:</strong> ${loc.specialty}</div>`;
-      }
-
-      popupHTML += `<div class="popup-link"><a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank">🗺️ Open Directions in Google Maps</a></div>`;
-
-      m.bindPopup(popupHTML);
-      markerStore.push({ marker: m, data: loc, color: pinColor });
-    });
-
-    updateSidebar(markerStore);
-  }
-
-  // Update Dynamic Sidebar
-  function updateSidebar(visibleItems) {
-    const listEl = document.getElementById('sidebar-list');
-    const countEl = document.getElementById('location-count');
-    listEl.innerHTML = '';
-    countEl.textContent = visibleItems.length;
-
-    visibleItems.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'sidebar-item';
-      li.innerHTML = `
-        <div class="sidebar-title">${item.data.name}</div>
-        <div class="sidebar-sub">📍 ${item.data.neighborhood} | 🚇 ${item.data.tube.split('(')[0]}</div>
-        <span class="sidebar-badge" style="background-color: ${item.color}">${item.data.cat}</span>
-      `;
-      li.onclick = () => {
-        map.setView([item.data.lat, item.data.lng], 16);
-        item.marker.openPopup();
-      };
-      listEl.appendChild(li);
-    });
-  }
-
-  // Filter Markers & Sidebar
-  function filterMarkers() {
-    const searchVal = document.getElementById('search-box').value.toLowerCase();
-    const catVal = document.getElementById('category-select').value;
-    const visibleItems = [];
-
-    markerStore.forEach(item => {
-      const matchesSearch = item.data.name.toLowerCase().includes(searchVal) || 
-                            item.data.neighborhood.toLowerCase().includes(searchVal) ||
-                            item.data.tube.toLowerCase().includes(searchVal);
-      const matchesCat = (catVal === 'ALL') || (item.data.cat === catVal);
-
-      if (matchesSearch && matchesCat) {
-        if (!map.hasLayer(item.marker)) map.addLayer(item.marker);
-        visibleItems.push(item);
-      } else {
-        if (map.hasLayer(item.marker)) map.removeLayer(item.marker);
-      }
-    });
-
-    updateSidebar(visibleItems);
-  }
-
-  // Locate User GPS
-  function locateUser() {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
+    // Distance calculation function (Haversine in miles)
+    function getDistanceInMiles(lat1, lon1, lat2, lon2) {
+      const R = 3958.8; // Radius of the Earth in miles
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return (R * c).toFixed(2);
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const uLat = pos.coords.latitude;
-        const uLng = pos.coords.longitude;
+    // Attach computed distances
+    function updateDistances() {
+      locations.forEach(loc => {
+        loc.distance = parseFloat(getDistanceInMiles(SOHO_LAT, SOHO_LNG, loc.lat, loc.lng));
+      });
+    }
+    updateDistances();
 
-        if (userMarker) map.removeLayer(userMarker);
+    // Map Setup
+    const map = L.map('map').setView([SOHO_LAT, SOHO_LNG], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        userMarker = L.circleMarker([uLat, uLng], {
-          radius: 9,
-          fillColor: '#2563eb',
-          color: '#ffffff',
-          weight: 3,
-          opacity: 1,
-          fillOpacity: 0.9
-        }).addTo(map).bindPopup("<b>You Are Here</b>").openPopup();
+    // Custom Soho Center Marker
+    const sohoIcon = L.divIcon({
+      className: 'soho-marker',
+      html: `<div style="background:#f2a900; color:#005587; border:2px solid #005587; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; box-shadow:0 2px 6px rgba(0,0,0,0.3);">Soho</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+    L.marker([SOHO_LAT, SOHO_LNG], { icon: sohoIcon }).addTo(map).bindPopup("<b>Soho Center Benchmark</b>");
 
-        let closest = null;
-        let minDistance = Infinity;
+    let activeMarkers = [];
 
-        markerStore.forEach(item => {
-          const loc = item.data;
-          const dist = map.distance([uLat, uLng], [loc.lat, loc.lng]);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closest = loc;
-          }
+    // Render Function
+    function render() {
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const timeVal = document.getElementById('timeFilter').value;
+      const categoryVal = document.getElementById('categoryFilter').value;
+
+      // Filter dataset
+      const filtered = locations.filter(loc => {
+        const matchesSearch = loc.name.toLowerCase().includes(searchVal) || loc.address.toLowerCase().includes(searchVal);
+        const matchesTime = (timeVal === "ALL" || loc.bestTime === timeVal);
+        const matchesCat = (categoryVal === "ALL" || loc.category === categoryVal);
+        return matchesSearch && matchesTime && matchesCat;
+      });
+
+      // Sort by distance from Soho
+      filtered.sort((a, b) => a.distance - b.distance);
+
+      // Clear existing map markers
+      activeMarkers.forEach(m => map.removeLayer(m));
+      activeMarkers = [];
+
+      // Clear & Populate Sidebar List
+      const listContainer = document.getElementById('locationList');
+      listContainer.innerHTML = '';
+      document.getElementById('countDisplay').innerText = `Showing ${filtered.length} of ${locations.length} locations`;
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted);">No Greggs stores match your selected filters.</div>`;
+        return;
+      }
+
+      filtered.forEach(loc => {
+        // Create Card
+        const card = document.createElement('div');
+        card.className = 'location-card';
+        card.id = `card-${loc.id}`;
+        card.innerHTML = `
+          <div class="card-title">${loc.name}</div>
+          <div class="card-address">${loc.address}</div>
+          <div class="card-meta">
+            <span class="tag tag-category">${loc.category}</span>
+            <span class="tag tag-time">🕒 Best: ${loc.bestTime}</span>
+            <span class="tag tag-dist">${loc.distance} mi</span>
+          </div>
+        `;
+
+        // Create Map Marker
+        const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+        marker.bindPopup(`
+          <div style="font-family: sans-serif;">
+            <b style="color:#005587;">${loc.name}</b><br/>
+            ${loc.address}<br/>
+            <small><b>Best Time:</b> ${loc.bestTime}</small>
+          </div>
+        `);
+
+        // Marker Click -> Highlight Card
+        marker.on('click', () => {
+          document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
-        if (closest) {
-          map.setView([uLat, uLng], 15);
-          alert(`Nearest spot is "${closest.name}" (${Math.round(minDistance)} meters away).`);
-        }
-      },
-      () => alert("Unable to retrieve your current location. Please check GPS permissions.")
-    );
-  }
+        // Card Click -> Pan Map & Open Popup
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          map.panTo([loc.lat, loc.lng]);
+          marker.openPopup();
+        });
 
-  loadMarkers();
-</script>
+        activeMarkers.push(marker);
+        listContainer.appendChild(card);
+      });
+    }
+
+    // Event Listeners for Filters
+    document.getElementById('searchInput').addEventListener('input', render);
+    document.getElementById('timeFilter').addEventListener('change', render);
+    document.getElementById('categoryFilter').addEventListener('change', render);
+
+    // Modal Logic
+    const addModal = document.getElementById('addModal');
+    document.getElementById('openAddModalBtn').addEventListener('click', () => addModal.classList.add('open'));
+    document.getElementById('closeAddModalBtn').addEventListener('click', () => addModal.classList.remove('open'));
+    document.getElementById('cancelModalBtn').addEventListener('click', () => addModal.classList.remove('open'));
+
+    // Handle Form Submit (Add New Location)
+    document.getElementById('addLocationForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const newLoc = {
+        id: Date.now(),
+        name: document.getElementById('newTitle').value,
+        address: document.getElementById('newAddress').value,
+        category: document.getElementById('newCategory').value,
+        bestTime: document.getElementById('newBestTime').value,
+        lat: parseFloat(document.getElementById('newLat').value),
+        lng: parseFloat(document.getElementById('newLng').value)
+      };
+
+      locations.push(newLoc);
+      updateDistances();
+      
+      // Close Modal & Reset Form
+      addModal.classList.remove('open');
+      e.target.reset();
+
+      // Refresh Display & Pan to new location
+      render();
+      map.flyTo([newLoc.lat, newLoc.lng], 15);
+    });
+
+    // Initial Render
+    render();
+  </script>
 </body>
 </html>
